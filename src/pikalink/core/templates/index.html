@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
+
+    <title>{{ site_title }}</title>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 5%;
+            padding-bottom: 20%;
+            background-color: #f5f5f5;
+        }
+
+        .center-part {
+            max-width: 90%;
+            padding: 5%;
+            margin: auto;
+        }
+
+    </style>
+
+
+</head>
+<body class="text-center">
+<main class="center-part">
+
+    <h1 class="h3 mb-3 fw-normal">{{ title | safe }}</h1>
+
+    <p class="text-muted">
+       {{ msg | safe }}
+    </p>
+
+    {% if actions %}
+    <div class="d-grid gap-2 d-md-block">
+        {% if actions.primary %}
+        <a class="btn btn-primary" href="{{ actions.primary.link }}">{{ actions.primary.text }}</a>
+        {% endif %}
+        {% if actions.secondary %}
+        <a class="btn btn-outline-primary" href="{{ actions.secondary.link }}">{{ actions.secondary.text }}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</main>
+
+
+<script src="{% static 'bootstrap.bundle.min.js' %}"></script>
+
+</body>
+</html>
