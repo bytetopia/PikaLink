@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-c5ne96d=b#@p_@@jlg1v$i2je2@%qa6$@84q@i3gqwog-ef!#x')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'pikalink.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DJANGO_DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.getenv('DJANGO_DB_NAME', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'NAME': os.getenv('DJANGO_DB_NAME', os.path.join(BASE_DIR, 'data', 'db.sqlite3')),
         'USER': os.getenv('DJANGO_DB_USER', ''),
         'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', ''),
         'HOST': os.getenv('DJANGO_DB_HOST', ''),
@@ -123,7 +123,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = 'static'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
