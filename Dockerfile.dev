@@ -1,0 +1,23 @@
+FROM node:18-alpine
+
+# Install Go
+RUN apk add --no-cache go gcc musl-dev sqlite-dev
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./frontend/
+COPY backend/go.mod backend/go.sum ./backend/
+
+# Install dependencies
+RUN cd frontend && npm install
+RUN cd backend && go mod download
+
+# Copy source code
+COPY . .
+
+# Expose ports
+EXPOSE 8080 3000
+
+# Start both frontend and backend in development mode
+CMD ["sh", "-c", "cd frontend && npm start & cd backend && go run main.go"]

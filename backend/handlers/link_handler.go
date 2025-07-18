@@ -261,7 +261,23 @@ func DeleteLink(c *gin.Context) {
 }
 
 func RedirectLink(c *gin.Context) {
-    shortCode := c.Param("code")
+    var shortCode string
+    
+    // Try to get from route parameter first (if called from a proper route)
+    shortCode = c.Param("code")
+    
+    // If no route parameter, extract from URL path (when called from NoRoute)
+    if shortCode == "" {
+        path := c.Request.URL.Path
+        if len(path) > 1 {
+            shortCode = path[1:] // Remove leading slash
+        }
+    }
+    
+    if shortCode == "" {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        return
+    }
     
     var originalURL string
     var linkID int
@@ -282,4 +298,53 @@ func RedirectLink(c *gin.Context) {
     database.DB.Exec("UPDATE links SET click_count = click_count + 1 WHERE id = ?", linkID)
     
     c.Redirect(http.StatusFound, originalURL)
+}
+
+func ChangePassword(c *gin.Context) {
+    var req models.ChangePasswordRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    userID := c.MustGet("user_id").(int)
+
+    // Validate new password length
+    if len(req.NewPassword) < 6 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "New password must be at least 6 characters long"})
+        return
+    }
+
+    // Get current user password from database
+    var currentHashedPassword string
+    err := database.DB.QueryRow("SELECT password FROM users WHERE id = ?", userID).
+        Scan(&currentHashedPassword)
+    
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user data"})
+        return
+    }
+
+    // Verify current password
+    err = bcrypt.CompareHashAndPassword([]byte(currentHashedPassword), []byte(req.CurrentPassword))
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password is incorrect"})
+        return
+    }
+
+    // Hash new password
+    newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+        return
+    }
+
+    // Update password in database
+    _, err = database.DB.Exec("UPDATE users SET password = ? WHERE id = ?", string(newHashedPassword), userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }

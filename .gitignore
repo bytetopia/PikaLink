@@ -49,6 +49,7 @@ go.work
 backend/pikalink-backend
 backend/pikalink-backend.exe
 backend/tmp/
+backend/frontend/
 
 # Database files (if you want to exclude them from version control)
 *.db
@@ -106,3 +107,6 @@ temp/
 
 # Runtime configuration files
 .npmrc
+
+# dist
+dist/

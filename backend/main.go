@@ -25,11 +25,10 @@ func main() {
         AllowCredentials: true,
     }))
     
-    // Public routes
+    // API routes (unchanged)
     r.POST("/api/login", handlers.Login)
-    r.GET("/s/:code", handlers.RedirectLink)
     
-    // Protected routes
+    // Protected API routes
     api := r.Group("/api")
     api.Use(middleware.AuthMiddleware())
     {
@@ -37,7 +36,28 @@ func main() {
         api.POST("/links", handlers.CreateLink)
         api.PUT("/links/:id", handlers.UpdateLink)
         api.DELETE("/links/:id", handlers.DeleteLink)
+        api.POST("/change-password", handlers.ChangePassword)
     }
+    
+    // Serve admin frontend static files at /admin (MUST come before /:code route)
+    r.Static("/admin", "./frontend/")
+    
+    // Add specific route for short URL redirects (AFTER static routes)
+    r.GET("/:code", handlers.RedirectLink)
+    
+    // Handle frontend routes that don't match static files
+    r.NoRoute(func(c *gin.Context) {
+        path := c.Request.URL.Path
+        
+        // If it's an admin route that doesn't match a static file, serve index.html
+        if len(path) > 6 && path[:6] == "/admin" {
+            c.File("./frontend/index.html")
+            return
+        }
+        
+        // Default 404
+        c.JSON(404, gin.H{"error": "Not found"})
+    })
     
     log.Println("Server starting on :8080")
     r.Run(":8080")

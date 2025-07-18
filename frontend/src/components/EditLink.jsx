@@ -68,7 +68,7 @@ function EditLink({ user, onLogout }) {
         short_code: shortCode
       }, getAuthHeaders());
 
-      navigate('/');
+      navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update link');
     } finally {
@@ -84,7 +84,7 @@ function EditLink({ user, onLogout }) {
         <Toolbar>
           <Button
             color="inherit"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
             sx={{ mr: 2 }}
           >
@@ -152,7 +152,7 @@ function EditLink({ user, onLogout }) {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/admin')}
               >
                 Cancel
               </Button>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -7,6 +6,7 @@ import Login from './components/Login';
 import LinkList from './components/LinkList';
 import CreateLink from './components/CreateLink';
 import EditLink from './components/EditLink';
+import ChangePassword from './components/ChangePassword';
 
 const theme = createTheme({
   palette: {
@@ -55,29 +55,37 @@ function App() {
       <Router>
         <Routes>
           <Route 
-            path="/login" 
+            path="/admin/login" 
             element={
-              user ? <Navigate to="/" /> : <Login onLogin={login} />
+              user ? <Navigate to="/admin" /> : <Login onLogin={login} />
             } 
           />
           <Route 
-            path="/" 
+            path="/admin" 
             element={
-              user ? <LinkList user={user} onLogout={logout} /> : <Navigate to="/login" />
+              user ? <LinkList user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
             } 
           />
           <Route 
-            path="/create" 
+            path="/admin/create" 
             element={
-              user ? <CreateLink user={user} onLogout={logout} /> : <Navigate to="/login" />
+              user ? <CreateLink user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
             } 
           />
           <Route 
-            path="/edit/:id" 
+            path="/admin/edit/:id" 
             element={
-              user ? <EditLink user={user} onLogout={logout} /> : <Navigate to="/login" />
+              user ? <EditLink user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
             } 
           />
+          <Route 
+            path="/admin/change-password" 
+            element={
+              user ? <ChangePassword user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
+            } 
+          />
+          {/* Redirect root to admin */}
+          <Route path="/" element={<Navigate to="/admin" />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -16,9 +16,11 @@ import {
   AppBar,
   Toolbar,
   Chip,
-  Alert
+  Alert,
+  Menu,
+  MenuItem
 } from '@mui/material';
-import { Edit, Delete, Add, ExitToApp, ContentCopy } from '@mui/icons-material';
+import { Edit, Delete, Add, ExitToApp, ContentCopy, AccountCircle, Settings } from '@mui/icons-material';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -27,9 +29,10 @@ function LinkList({ user, onLogout }) {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
-  // Get the backend URL for redirects - this is where the /s/ endpoint actually exists
+  // Get the base URL for short redirects - now at root path
   const getRedirectBaseUrl = () => {
     // In development, use the backend port
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -44,6 +47,19 @@ function LinkList({ user, onLogout }) {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
   });
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChangePassword = () => {
+    handleMenuClose();
+    navigate('/admin/change-password');
+  };
 
   const fetchLinks = async () => {
     try {
@@ -91,9 +107,27 @@ function LinkList({ user, onLogout }) {
           <Typography variant="body2" sx={{ mr: 2 }}>
             Welcome, {user.username}
           </Typography>
-          <Button color="inherit" onClick={onLogout} startIcon={<ExitToApp />}>
-            Logout
-          </Button>
+          <IconButton
+            color="inherit"
+            onClick={handleMenuOpen}
+            sx={{ mr: 1 }}
+          >
+            <AccountCircle />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleChangePassword}>
+              <Settings sx={{ mr: 1 }} />
+              Change Password
+            </MenuItem>
+            <MenuItem onClick={onLogout}>
+              <ExitToApp sx={{ mr: 1 }} />
+              Logout
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
@@ -103,7 +137,7 @@ function LinkList({ user, onLogout }) {
           <Button
             variant="contained"
             startIcon={<Add />}
-            onClick={() => navigate('/create')}
+            onClick={() => navigate('/admin/create')}
           >
             Create New Link
           </Button>
@@ -137,11 +171,11 @@ function LinkList({ user, onLogout }) {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body2" sx={{ mr: 1 }}>
-                          {`${getRedirectBaseUrl()}/s/${link.short_code}`}
+                          {`${getRedirectBaseUrl()}/${link.short_code}`}
                         </Typography>
                         <IconButton
                           size="small"
-                          onClick={() => copyToClipboard(`${getRedirectBaseUrl()}/s/${link.short_code}`)}
+                          onClick={() => copyToClipboard(`${getRedirectBaseUrl()}/${link.short_code}`)}
                         >
                           <ContentCopy fontSize="small" />
                         </IconButton>
@@ -163,7 +197,7 @@ function LinkList({ user, onLogout }) {
                     <TableCell>{formatDate(link.created_at)}</TableCell>
                     <TableCell>
                       <IconButton
-                        onClick={() => navigate(`/edit/${link.id}`)}
+                        onClick={() => navigate(`/admin/edit/${link.id}`)}
                         color="primary"
                       >
                         <Edit />

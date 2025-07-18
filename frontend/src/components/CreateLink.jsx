@@ -76,7 +76,7 @@ function CreateLink({ user, onLogout }) {
         custom_code: codeType === 'custom' ? customCode.trim() : ''
       }, getAuthHeaders());
 
-      navigate('/');
+      navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create link');
     } finally {
@@ -90,7 +90,7 @@ function CreateLink({ user, onLogout }) {
         <Toolbar>
           <Button
             color="inherit"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/admin')}
             startIcon={<ArrowBack />}
             sx={{ mr: 2 }}
           >
@@ -186,7 +186,7 @@ function CreateLink({ user, onLogout }) {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/admin')}
               >
                 Cancel
               </Button>
