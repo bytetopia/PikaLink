@@ -9,8 +9,9 @@ import {
   Alert 
 } from '@mui/material';
 import axios from 'axios';
+import config from '../config';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = config.API_BASE_URL;
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');

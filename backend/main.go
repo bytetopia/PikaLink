@@ -2,6 +2,8 @@ package main
 
 import (
     "log"
+    "os"
+    "strings"
     "pikalink-backend/database"
     "pikalink-backend/handlers"
     "pikalink-backend/middleware"
@@ -16,9 +18,21 @@ func main() {
     // Create Gin router
     r := gin.Default()
     
+    // Get CORS origins from environment variable, default to localhost:3000 for development
+    corsOrigins := os.Getenv("CORS_ORIGINS")
+    if corsOrigins == "" {
+        corsOrigins = "http://localhost:3000"
+    }
+    
+    // Split the origins by comma for multiple origins
+    allowedOrigins := strings.Split(corsOrigins, ",")
+    for i, origin := range allowedOrigins {
+        allowedOrigins[i] = strings.TrimSpace(origin)
+    }
+    
     // CORS middleware
     r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:3000"},
+        AllowOrigins:     allowedOrigins,
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
         ExposeHeaders:    []string{"Content-Length"},

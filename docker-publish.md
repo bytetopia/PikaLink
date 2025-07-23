@@ -9,11 +9,31 @@ This guide walks you through the process of publishing your PikaLink Docker imag
 - GitHub account with Personal Access Token (for GitHub Container Registry)
 - PowerShell (Windows) or Bash (Linux/macOS)
 
+## Build Scripts
+
+This project includes build scripts for both Windows and Linux environments:
+- `docker-build.ps1` - PowerShell script for Windows
+- `docker-build.sh` - Bash script for Linux/macOS
+
 ## Quick Start
 
+### Windows (PowerShell)
 ```powershell
 # Build and test locally
 .\docker-build.ps1
+
+# Test the application
+docker run -p 8080:8080 pikalink:latest
+# Visit http://localhost:8080/admin to verify it works
+
+# Stop the container
+docker stop $(docker ps -q --filter ancestor=pikalink:latest)
+```
+
+### Linux/macOS (Bash)
+```bash
+# Build and test locally
+./docker-build.sh
 
 # Test the application
 docker run -p 8080:8080 pikalink:latest
@@ -36,6 +56,7 @@ docker stop $(docker ps -q --filter ancestor=pikalink:latest)
 
 ### Step 2: Build Production Image
 
+#### Windows (PowerShell)
 ```powershell
 # Build optimized production image
 .\docker-build.ps1 -Tag "pikalink:v1.0.0" -NoBuildCache
@@ -44,9 +65,27 @@ docker stop $(docker ps -q --filter ancestor=pikalink:latest)
 docker images | findstr pikalink
 ```
 
+#### Linux/macOS (Bash)
+```bash
+# Build optimized production image
+./docker-build.sh -t "pikalink:v1.0.0" -n
+
+# Verify the image was created
+docker images | grep pikalink
+```
+
 ### Step 3: Login to Docker Hub
 
+#### Windows (PowerShell)
 ```powershell
+# Login to Docker Hub
+docker login
+
+# Enter your Docker Hub username and password when prompted
+```
+
+#### Linux/macOS (Bash)
+```bash
 # Login to Docker Hub
 docker login
 
@@ -55,9 +94,24 @@ docker login
 
 ### Step 4: Tag and Push
 
+#### Windows (PowerShell)
 ```powershell
 # Replace 'yourusername' with your actual Docker Hub username
 $DOCKER_USERNAME = "yourusername"
+
+# Tag for Docker Hub
+docker tag pikalink:v1.0.0 ${DOCKER_USERNAME}/pikalink:v1.0.0
+docker tag pikalink:v1.0.0 ${DOCKER_USERNAME}/pikalink:latest
+
+# Push to Docker Hub
+docker push ${DOCKER_USERNAME}/pikalink:v1.0.0
+docker push ${DOCKER_USERNAME}/pikalink:latest
+```
+
+#### Linux/macOS (Bash)
+```bash
+# Replace 'yourusername' with your actual Docker Hub username
+DOCKER_USERNAME="yourusername"
 
 # Tag for Docker Hub
 docker tag pikalink:v1.0.0 ${DOCKER_USERNAME}/pikalink:v1.0.0
@@ -74,6 +128,7 @@ docker push ${DOCKER_USERNAME}/pikalink:latest
 2. Verify both tags (`v1.0.0` and `latest`) are visible
 3. Test pulling the image:
 
+#### Windows (PowerShell)
 ```powershell
 # Remove local image to test pull
 docker rmi ${DOCKER_USERNAME}/pikalink:latest
@@ -85,148 +140,31 @@ docker pull ${DOCKER_USERNAME}/pikalink:latest
 docker run -d -p 8080:8080 --name pikalink-test ${DOCKER_USERNAME}/pikalink:latest
 ```
 
-## Publishing to GitHub Container Registry (GHCR)
+#### Linux/macOS (Bash)
+```bash
+# Remove local image to test pull
+docker rmi ${DOCKER_USERNAME}/pikalink:latest
 
-### Step 1: Create Personal Access Token
+# Pull from Docker Hub
+docker pull ${DOCKER_USERNAME}/pikalink:latest
 
-1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. Click "Generate new token (classic)"
-3. Select scopes: `write:packages`, `read:packages`, `delete:packages`
-4. Generate and copy the token
-
-### Step 2: Login to GHCR
-
-```powershell
-# Set your GitHub username and token
-$GITHUB_USERNAME = "yourusername"
-$GITHUB_TOKEN = "your_personal_access_token"
-
-# Login to GitHub Container Registry
-echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
+# Test run
+docker run -d -p 8080:8080 --name pikalink-test ${DOCKER_USERNAME}/pikalink:latest
 ```
 
-### Step 3: Tag and Push to GHCR
-
-```powershell
-# Tag for GitHub Container Registry
-docker tag pikalink:v1.0.0 ghcr.io/${GITHUB_USERNAME}/pikalink:v1.0.0
-docker tag pikalink:v1.0.0 ghcr.io/${GITHUB_USERNAME}/pikalink:latest
-
-# Push to GHCR
-docker push ghcr.io/${GITHUB_USERNAME}/pikalink:v1.0.0
-docker push ghcr.io/${GITHUB_USERNAME}/pikalink:latest
-```
-
-### Step 4: Make Package Public (Optional)
-
-1. Go to your GitHub profile → Packages
-2. Find the `pikalink` package
-3. Click on it → Package settings
-4. Change visibility to Public if desired
-
-## Publishing to AWS ECR
-
-### Step 1: Setup AWS CLI
-
-```powershell
-# Install AWS CLI if not already installed
-# Download from: https://aws.amazon.com/cli/
-
-# Configure AWS credentials
-aws configure
-```
-
-### Step 2: Create ECR Repository
-
-```powershell
-# Create ECR repository
-aws ecr create-repository --repository-name pikalink --region us-east-1
-
-# Get login token and login
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
-```
-
-### Step 3: Tag and Push to ECR
-
-```powershell
-# Replace with your actual AWS account ID and region
-$AWS_ACCOUNT_ID = "123456789012"
-$AWS_REGION = "us-east-1"
-
-# Tag for ECR
-docker tag pikalink:v1.0.0 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/pikalink:v1.0.0
-docker tag pikalink:v1.0.0 ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/pikalink:latest
-
-# Push to ECR
-docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/pikalink:v1.0.0
-docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/pikalink:latest
-```
 
 ## Automated Publishing Script
 
-Create an automated publishing script for easier deployment:
-
-```powershell
-# Save as: publish-docker.ps1
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$Version,
-    
-    [Parameter(Mandatory=$true)]
-    [string]$Username,
-    
-    [ValidateSet("dockerhub", "ghcr", "ecr")]
-    [string]$Registry = "dockerhub",
-    
-    [switch]$Latest = $true
-)
-
-Write-Host "Publishing PikaLink v$Version to $Registry..." -ForegroundColor Cyan
-
-# Build image
-.\docker-build.ps1 -Tag "pikalink:$Version" -NoBuildCache
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: Build failed" -ForegroundColor Red
-    exit 1
-}
-
-# Tag and push based on registry
-switch ($Registry) {
-    "dockerhub" {
-        docker tag "pikalink:$Version" "$Username/pikalink:$Version"
-        docker push "$Username/pikalink:$Version"
-        
-        if ($Latest) {
-            docker tag "pikalink:$Version" "$Username/pikalink:latest"
-            docker push "$Username/pikalink:latest"
-        }
-    }
-    "ghcr" {
-        docker tag "pikalink:$Version" "ghcr.io/$Username/pikalink:$Version"
-        docker push "ghcr.io/$Username/pikalink:$Version"
-        
-        if ($Latest) {
-            docker tag "pikalink:$Version" "ghcr.io/$Username/pikalink:latest"
-            docker push "ghcr.io/$Username/pikalink:latest"
-        }
-    }
-    "ecr" {
-        # ECR implementation would go here
-        Write-Host "ECR publishing not implemented in this script" -ForegroundColor Yellow
-    }
-}
-
-Write-Host "SUCCESS: Published pikalink:$Version to $Registry" -ForegroundColor Green
-```
+Automated publishing script for easier deployment:
 
 Usage:
-```powershell
-# Publish to Docker Hub
-.\publish-docker.ps1 -Version "1.0.0" -Username "yourusername" -Registry "dockerhub"
+```bash
+# Make script executable
+chmod +x publish-docker.sh
 
-# Publish to GitHub Container Registry
-.\publish-docker.ps1 -Version "1.0.0" -Username "yourusername" -Registry "ghcr"
+# Publish to Docker Hub
+./publish-docker.sh -v "1.0.0" -u "yourusername"
+
 ```
 
 ## User Deployment Instructions
@@ -270,7 +208,7 @@ services:
       - pikalink_data:/app/data
     restart: unless-stopped
     environment:
-      - DB_PATH=/app/data/pikalink.db
+      - DATA_PATH=/app/data
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/admin"]
       interval: 30s
@@ -302,6 +240,8 @@ docker-compose up -d
 ### Common Issues
 
 **Build Fails:**
+
+Windows (PowerShell):
 ```powershell
 # Clear Docker cache
 docker system prune -a
@@ -310,10 +250,30 @@ docker system prune -a
 .\docker-build.ps1 -NoBuildCache
 ```
 
+Linux/macOS (Bash):
+```bash
+# Clear Docker cache
+docker system prune -a
+
+# Rebuild without cache
+./docker-build.sh -n
+```
+
 **Push Fails:**
+
+Windows (PowerShell):
 ```powershell
 # Check if logged in
 docker info | findstr Username
+
+# Re-login if needed
+docker login
+```
+
+Linux/macOS (Bash):
+```bash
+# Check if logged in
+docker info | grep Username
 
 # Re-login if needed
 docker login
@@ -325,9 +285,17 @@ docker login
 - Remove unnecessary dependencies
 
 **Health Check Fails:**
+
+Windows (PowerShell):
 ```powershell
 # Test health check manually
-docker exec -it container_name wget --quiet --tries=1 --spider http://localhost:8080/admin
+docker exec -it container_name wget --quiet --tries=1 --spider http://localhost:8080/admin/
+```
+
+Linux/macOS (Bash):
+```bash
+# Test health check manually
+docker exec -it container_name wget --quiet --tries=1 --spider http://localhost:8080/admin/
 ```
 
 ## Security Considerations

@@ -213,7 +213,7 @@ You can customize the production deployment with environment variables:
 ```bash
 export PORT=8080                    # Server port (default: 8080)
 export GIN_MODE=release            # Set Gin to release mode
-export DATABASE_PATH=./pikalink.db # Database file path
+export DATA_PATH=./data              # Data directory path (for database and logs)
 ```
 
 ### Systemd Service (Linux)

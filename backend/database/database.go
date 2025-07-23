@@ -3,6 +3,8 @@ package database
 import (
     "database/sql"
     "log"
+    "os"
+    "path/filepath"
     _ "modernc.org/sqlite"  // Replace the mattn/go-sqlite3 import
     "golang.org/x/crypto/bcrypt"
 )
@@ -10,8 +12,23 @@ import (
 var DB *sql.DB
 
 func InitDB() {
+    // Get data path from environment variable, default to current directory
+    dataPath := os.Getenv("DATA_PATH")
+    if dataPath == "" {
+        dataPath = "."
+    }
+
+    // Create data directory if it doesn't exist
+    if err := os.MkdirAll(dataPath, 0755); err != nil {
+        log.Fatal("Failed to create data directory:", err)
+    }
+
+    // Construct database file path
+    dbPath := filepath.Join(dataPath, "pikalink.db")
+    log.Printf("Initializing database at: %s", dbPath)
+
     var err error
-    DB, err = sql.Open("sqlite", "./pikalink.db")
+    DB, err = sql.Open("sqlite", dbPath)
     if err != nil {
         log.Fatal("Failed to connect to database:", err)
     }

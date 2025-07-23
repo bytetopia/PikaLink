@@ -15,7 +15,7 @@ services:
       - /app/frontend/node_modules
       - /app/backend/vendor
     environment:
-      - DB_PATH=/app/data/pikalink.db
+      - DATA_PATH=/app/data
       - GIN_MODE=debug
     restart: unless-stopped
 

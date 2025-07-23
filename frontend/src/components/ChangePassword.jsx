@@ -14,8 +14,9 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = config.API_BASE_URL;
 
 function ChangePassword({ user, onLogout }) {
   const [currentPassword, setCurrentPassword] = useState('');

@@ -22,8 +22,9 @@ import {
 } from '@mui/material';
 import { Edit, Delete, Add, ExitToApp, ContentCopy, AccountCircle, Settings } from '@mui/icons-material';
 import axios from 'axios';
+import config from '../config';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = config.API_BASE_URL;
 
 function LinkList({ user, onLogout }) {
   const [links, setLinks] = useState([]);
@@ -34,12 +35,7 @@ function LinkList({ user, onLogout }) {
 
   // Get the base URL for short redirects - now at root path
   const getRedirectBaseUrl = () => {
-    // In development, use the backend port
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:8080';
-    }
-    // In production, assuming the backend runs on the same domain
-    return `${window.location.protocol}//${window.location.host}`;
+    return config.SHORT_LINK_BASE_URL;
   };
 
   const getAuthHeaders = () => ({
