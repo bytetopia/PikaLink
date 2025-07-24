@@ -33,19 +33,12 @@ RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
-# Create non-root user
-RUN addgroup -g 1001 -S pikalink && \
-    adduser -S pikalink -u 1001
-
 # Copy the binary and frontend files
 COPY --from=backend-builder /app/backend/pikalink .
 COPY --from=backend-builder /app/backend/frontend ./frontend
 
 # Create data directory for SQLite database
-RUN mkdir -p /app/data && chown pikalink:pikalink /app/data
-
-# Switch to non-root user
-USER pikalink
+RUN mkdir -p /app/data
 
 # Expose port
 EXPOSE 8080

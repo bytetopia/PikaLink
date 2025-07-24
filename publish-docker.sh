@@ -103,27 +103,6 @@ case $REGISTRY in
             fi
         fi
         ;;
-    "ghcr")
-        echo -e "${CYAN}Tagging and pushing to GitHub Container Registry...${NC}"
-        docker tag "pikalink:$VERSION" "ghcr.io/$USERNAME/pikalink:$VERSION"
-        if ! docker push "ghcr.io/$USERNAME/pikalink:$VERSION"; then
-            echo -e "${RED}ERROR: Failed to push version tag${NC}" >&2
-            exit 1
-        fi
-        
-        if [[ "$LATEST" == true ]]; then
-            docker tag "pikalink:$VERSION" "ghcr.io/$USERNAME/pikalink:latest"
-            if ! docker push "ghcr.io/$USERNAME/pikalink:latest"; then
-                echo -e "${RED}ERROR: Failed to push latest tag${NC}" >&2
-                exit 1
-            fi
-        fi
-        ;;
-    "ecr")
-        echo -e "${YELLOW}ECR publishing not implemented in this script${NC}"
-        echo -e "${YELLOW}Please use the manual ECR steps in the documentation${NC}"
-        exit 1
-        ;;
 esac
 
 echo -e "${GREEN}SUCCESS: Published pikalink:$VERSION to $REGISTRY${NC}"
@@ -135,9 +114,5 @@ case $REGISTRY in
     "dockerhub")
         echo "1. Visit https://hub.docker.com/u/$USERNAME to verify the publication"
         echo "2. Test: docker pull $USERNAME/pikalink:$VERSION"
-        ;;
-    "ghcr")
-        echo "1. Visit https://github.com/$USERNAME?tab=packages to verify the publication"
-        echo "2. Test: docker pull ghcr.io/$USERNAME/pikalink:$VERSION"
         ;;
 esac
