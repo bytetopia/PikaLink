@@ -4,6 +4,8 @@ import (
     "crypto/rand"
     "database/sql"
     "encoding/base64"
+    "encoding/csv"
+    "fmt"
     "net/http"
     "regexp"
     "strconv"
@@ -357,4 +359,149 @@ func ChangePassword(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+}
+
+// ImportResult represents the result of a CSV import operation
+type ImportResult struct {
+    SuccessCount int      `json:"success_count"`
+    FailedCount  int      `json:"failed_count"`
+    FailedItems  []string `json:"failed_items"`
+    TotalCount   int      `json:"total_count"`
+}
+
+// ImportLinks handles CSV import of links
+func ImportLinks(c *gin.Context) {
+    userID := c.MustGet("user_id").(int)
+    
+    // Get the uploaded file
+    file, _, err := c.Request.FormFile("file")
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
+        return
+    }
+    defer file.Close()
+
+    // Parse CSV
+    reader := csv.NewReader(file)
+    records, err := reader.ReadAll()
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid CSV format"})
+        return
+    }
+
+    if len(records) == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Empty CSV file"})
+        return
+    }
+
+    // Validate header
+    if len(records[0]) < 3 || records[0][0] != "original_url" || records[0][1] != "short_code" || records[0][2] != "title" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid CSV header. Expected: original_url,short_code,title"})
+        return
+    }
+
+    result := ImportResult{
+        SuccessCount: 0,
+        FailedCount:  0,
+        FailedItems:  []string{},
+        TotalCount:   len(records) - 1, // Exclude header
+    }
+
+    // Process each record (skip header)
+    for i, record := range records[1:] {
+        if len(record) < 3 {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: insufficient columns", i+2))
+            continue
+        }
+
+        originalURL := strings.TrimSpace(record[0])
+        shortCode := strings.TrimSpace(record[1])
+        title := strings.TrimSpace(record[2])
+
+        // Validate required fields
+        if originalURL == "" {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: empty original_url", i+2))
+            continue
+        }
+
+        if shortCode == "" {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: empty short_code", i+2))
+            continue
+        }
+
+        // Validate short code format
+        if !isValidCustomCode(shortCode) {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: invalid short_code '%s'", i+2, shortCode))
+            continue
+        }
+
+        // Check if short code already exists
+        if !isCustomCodeAvailable(shortCode) {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: short_code '%s' already exists", i+2, shortCode))
+            continue
+        }
+
+        // Insert the link
+        query := `INSERT INTO links (original_url, short_code, title, user_id, created_at, updated_at, click_count) 
+                  VALUES (?, ?, ?, ?, ?, ?, 0)`
+        
+        now := time.Now()
+        _, err := database.DB.Exec(query, originalURL, shortCode, title, userID, now, now)
+        if err != nil {
+            result.FailedCount++
+            result.FailedItems = append(result.FailedItems, fmt.Sprintf("Row %d: database error for short_code '%s'", i+2, shortCode))
+            continue
+        }
+
+        result.SuccessCount++
+    }
+
+    c.JSON(http.StatusOK, result)
+}
+
+// ExportLinks handles CSV export of all links for the current user
+func ExportLinks(c *gin.Context) {
+    userID := c.MustGet("user_id").(int)
+    
+    // Query all links for the user
+    rows, err := database.DB.Query(`
+        SELECT original_url, short_code, title 
+        FROM links WHERE user_id = ? ORDER BY created_at DESC
+    `, userID)
+    
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+        return
+    }
+    defer rows.Close()
+
+    // Set headers for CSV download
+    c.Header("Content-Type", "text/csv")
+    c.Header("Content-Disposition", "attachment; filename=pikalink_export.csv")
+
+    // Create CSV writer
+    writer := csv.NewWriter(c.Writer)
+    defer writer.Flush()
+
+    // Write header
+    writer.Write([]string{"original_url", "short_code", "title"})
+
+    // Write data
+    for rows.Next() {
+        var originalURL, shortCode, title string
+        if err := rows.Scan(&originalURL, &shortCode, &title); err != nil {
+            continue
+        }
+        
+        writer.Write([]string{originalURL, shortCode, title})
+    }
+
+    if err = rows.Err(); err != nil {
+        return
+    }
 }

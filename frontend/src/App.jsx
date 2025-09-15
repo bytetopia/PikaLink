@@ -7,6 +7,7 @@ import LinkList from './components/LinkList';
 import CreateLink from './components/CreateLink';
 import EditLink from './components/EditLink';
 import ChangePassword from './components/ChangePassword';
+import ImportExport from './components/ImportExport';
 
 const theme = createTheme({
   palette: {
@@ -82,6 +83,12 @@ function App() {
             path="/admin/change-password" 
             element={
               user ? <ChangePassword user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
+            } 
+          />
+          <Route 
+            path="/admin/import-export" 
+            element={
+              user ? <ImportExport user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
             } 
           />
           {/* Redirect root to admin */}

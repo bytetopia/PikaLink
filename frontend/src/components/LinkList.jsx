@@ -17,7 +17,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { Edit, Delete, Add, ContentCopy } from '@mui/icons-material';
+import { Edit, Delete, Add, ContentCopy, ImportExport } from '@mui/icons-material';
 import Header from './Header';
 import axios from 'axios';
 import config from '../config';
@@ -88,13 +88,22 @@ function LinkList({ user, onLogout }) {
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant="h4">Your Links</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => navigate('/admin/create')}
-          >
-            Create New Link
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<ImportExport />}
+              onClick={() => navigate('/admin/import-export')}
+            >
+              Import / Export
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => navigate('/admin/create')}
+            >
+              Create New Link
+            </Button>
+          </Box>
         </Box>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

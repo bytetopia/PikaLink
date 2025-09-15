@@ -51,6 +51,8 @@ func main() {
         api.PUT("/links/:id", handlers.UpdateLink)
         api.DELETE("/links/:id", handlers.DeleteLink)
         api.POST("/change-password", handlers.ChangePassword)
+        api.POST("/import", handlers.ImportLinks)
+        api.GET("/export", handlers.ExportLinks)
     }
     
     // Serve admin frontend static files at /admin (MUST come before /:code route)
