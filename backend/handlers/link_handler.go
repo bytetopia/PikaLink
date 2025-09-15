@@ -12,6 +12,7 @@ import (
     "pikalink-backend/database"
     "pikalink-backend/models"
     "pikalink-backend/middleware"
+    "pikalink-backend/logging"
     "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
 )
@@ -273,29 +274,38 @@ func RedirectLink(c *gin.Context) {
             shortCode = path[1:] // Remove leading slash
         }
     }
-    
+
     if shortCode == "" {
+        // Log the failed access attempt
+        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusNotFound)
         c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
         return
     }
-    
+
     var originalURL string
     var linkID int
     err := database.DB.QueryRow("SELECT id, original_url FROM links WHERE short_code = ?", shortCode).
         Scan(&linkID, &originalURL)
-    
+
     if err == sql.ErrNoRows {
+        // Log the failed access attempt
+        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusNotFound)
         c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
         return
     }
-    
+
     if err != nil {
+        // Log the error
+        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusInternalServerError)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
         return
     }
 
     // Increment click count
     database.DB.Exec("UPDATE links SET click_count = click_count + 1 WHERE id = ?", linkID)
+    
+    // Log the successful redirect
+    logging.LogLinkAccess(c.Request, shortCode, originalURL, http.StatusFound)
     
     c.Redirect(http.StatusFound, originalURL)
 }
