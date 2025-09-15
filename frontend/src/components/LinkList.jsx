@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -13,14 +13,12 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  AppBar,
-  Toolbar,
   Chip,
   Alert,
-  Menu,
-  MenuItem
+  CircularProgress
 } from '@mui/material';
-import { Edit, Delete, Add, ExitToApp, ContentCopy, AccountCircle, Settings } from '@mui/icons-material';
+import { Edit, Delete, Add, ContentCopy } from '@mui/icons-material';
+import Header from './Header';
 import axios from 'axios';
 import config from '../config';
 
@@ -30,7 +28,6 @@ function LinkList({ user, onLogout }) {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
   // Get the base URL for short redirects - now at root path
@@ -43,19 +40,6 @@ function LinkList({ user, onLogout }) {
       Authorization: `Bearer ${localStorage.getItem('token')}`
     }
   });
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChangePassword = () => {
-    handleMenuClose();
-    navigate('/admin/change-password');
-  };
 
   const fetchLinks = async () => {
     try {
@@ -70,7 +54,7 @@ function LinkList({ user, onLogout }) {
 
   useEffect(() => {
     fetchLinks();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this link?')) {
@@ -91,41 +75,15 @@ function LinkList({ user, onLogout }) {
     return new Date(dateString).toLocaleDateString();
   };
 
-  if (loading) return <div>Loading...</div>;
-
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            PikaLink Dashboard
-          </Typography>
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            Welcome, {user.username}
-          </Typography>
-          <IconButton
-            color="inherit"
-            onClick={handleMenuOpen}
-            sx={{ mr: 1 }}
-          >
-            <AccountCircle />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleChangePassword}>
-              <Settings sx={{ mr: 1 }} />
-              Change Password
-            </MenuItem>
-            <MenuItem onClick={onLogout}>
-              <ExitToApp sx={{ mr: 1 }} />
-              Logout
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <Header 
+        user={user} 
+        onLogout={onLogout} 
+        title="PikaLink Dashboard"
+        showBackButton={false}
+        showSettings={true}
+      />
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -154,7 +112,18 @@ function LinkList({ user, onLogout }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {links.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <CircularProgress />
+                      <Typography variant="body2" color="text.secondary">
+                        Loading your links...
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ) : links.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
                     No links found. Create your first link!

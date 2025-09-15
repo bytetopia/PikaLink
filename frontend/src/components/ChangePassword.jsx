@@ -6,13 +6,9 @@ import {
   Button, 
   Typography, 
   Box,
-  Alert,
-  AppBar,
-  Toolbar,
-  IconButton
+  Alert
 } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import Header from './Header';
 import axios from 'axios';
 import config from '../config';
 
@@ -25,7 +21,6 @@ function ChangePassword({ user, onLogout }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,28 +66,15 @@ function ChangePassword({ user, onLogout }) {
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="back"
-            onClick={() => navigate('/admin')}
-            sx={{ mr: 2 }}
-          >
-            <ArrowBack />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Change Password
-          </Typography>
-          <Typography variant="body1" sx={{ mr: 2 }}>
-            Welcome, {user.username}
-          </Typography>
-          <Button color="inherit" onClick={onLogout}>
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <Header 
+        user={user} 
+        onLogout={onLogout} 
+        title="Change Password"
+        showBackButton={true}
+        backButtonText="Back"
+        backDestination="/admin"
+        showSettings={false}
+      />
 
       <Container maxWidth="sm">
         <Box

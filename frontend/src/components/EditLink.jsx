@@ -7,11 +7,9 @@ import {
   TextField,
   Button,
   Box,
-  AppBar,
-  Toolbar,
   Alert
 } from '@mui/material';
-import { ArrowBack, ExitToApp } from '@mui/icons-material';
+import Header from './Header';
 import axios from 'axios';
 import config from '../config';
 
@@ -81,27 +79,15 @@ function EditLink({ user, onLogout }) {
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar>
-          <Button
-            color="inherit"
-            onClick={() => navigate('/admin')}
-            startIcon={<ArrowBack />}
-            sx={{ mr: 2 }}
-          >
-            Back to Links
-          </Button>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Edit Link
-          </Typography>
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            Welcome, {user.username}
-          </Typography>
-          <Button color="inherit" onClick={onLogout} startIcon={<ExitToApp />}>
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <Header 
+        user={user} 
+        onLogout={onLogout} 
+        title="Edit Link"
+        showBackButton={true}
+        backButtonText="Back to Links"
+        backDestination="/admin"
+        showSettings={false}
+      />
 
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Paper elevation={3} sx={{ padding: 4 }}>
