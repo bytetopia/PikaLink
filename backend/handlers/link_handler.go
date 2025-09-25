@@ -134,7 +134,6 @@ func CreateLink(c *gin.Context) {
         UserID:      userID,
         CreatedAt:   now,
         UpdatedAt:   now,
-        ClickCount:  0,
     }
 
     c.JSON(http.StatusCreated, link)
@@ -144,7 +143,7 @@ func GetLinks(c *gin.Context) {
     userID := c.MustGet("user_id").(int)
     
     rows, err := database.DB.Query(`
-        SELECT id, original_url, short_code, title, created_at, updated_at, click_count 
+        SELECT id, original_url, short_code, title, created_at, updated_at 
         FROM links WHERE user_id = ? ORDER BY created_at DESC
     `, userID)
     
@@ -158,7 +157,7 @@ func GetLinks(c *gin.Context) {
     for rows.Next() {
         var link models.Link
         err := rows.Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.Title, 
-                        &link.CreatedAt, &link.UpdatedAt, &link.ClickCount)
+                        &link.CreatedAt, &link.UpdatedAt)
         if err != nil {
             continue
         }
@@ -302,9 +301,6 @@ func RedirectLink(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
         return
     }
-
-    // Increment click count
-    database.DB.Exec("UPDATE links SET click_count = click_count + 1 WHERE id = ?", linkID)
     
     // Log the successful redirect
     logging.LogLinkAccess(c.Request, shortCode, originalURL, http.StatusFound)
@@ -447,8 +443,8 @@ func ImportLinks(c *gin.Context) {
         }
 
         // Insert the link
-        query := `INSERT INTO links (original_url, short_code, title, user_id, created_at, updated_at, click_count) 
-                  VALUES (?, ?, ?, ?, ?, ?, 0)`
+        query := `INSERT INTO links (original_url, short_code, title, user_id, created_at, updated_at) 
+                  VALUES (?, ?, ?, ?, ?, ?)`
         
         now := time.Now()
         _, err := database.DB.Exec(query, originalURL, shortCode, title, userID, now, now)

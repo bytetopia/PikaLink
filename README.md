@@ -14,7 +14,6 @@ A full-stack URL shortener application built with Go backend and React frontend.
 
 - Admin interface with Material-UI
    - CRUD for links
-   - click tracking
 
 
 ## 🤖 Selfhost 

@@ -13,7 +13,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Chip,
   Alert,
   CircularProgress
 } from '@mui/material';
@@ -115,7 +114,6 @@ function LinkList({ user, onLogout }) {
                 <TableCell>Title</TableCell>
                 <TableCell>Short Link</TableCell>
                 <TableCell>Original URL</TableCell>
-                <TableCell>Clicks</TableCell>
                 <TableCell>Created</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
@@ -123,7 +121,7 @@ function LinkList({ user, onLogout }) {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <CircularProgress />
                       <Typography variant="body2" color="text.secondary">
@@ -134,7 +132,7 @@ function LinkList({ user, onLogout }) {
                 </TableRow>
               ) : links.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={5} align="center">
                     No links found. Create your first link!
                   </TableCell>
                 </TableRow>
@@ -164,9 +162,6 @@ function LinkList({ user, onLogout }) {
                       }}>
                         {link.original_url}
                       </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={link.click_count} color="primary" size="small" />
                     </TableCell>
                     <TableCell>{formatDate(link.created_at)}</TableCell>
                     <TableCell>

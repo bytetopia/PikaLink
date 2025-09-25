@@ -58,7 +58,6 @@ func createTables() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         user_id INTEGER,
-        click_count INTEGER DEFAULT 0,
         FOREIGN KEY (user_id) REFERENCES users (id)
     );`
 
