@@ -17,15 +17,6 @@ A full-stack URL shortener application built with Go backend and React frontend.
    - click tracking
 
 
-## 🔍 Demo site
-
-// Demo site is WIP.
-
-> Admin URL: `YOUR_DOMAIN/admin/`
->
-> Default credential: user `admin`, pwd `admin123`
-
-
 ## 🤖 Selfhost 
 
 We provide prebuilt docker image, available at [bytetopia/pikalink](https://hub.docker.com/r/bytetopia/pikalink)
@@ -45,6 +36,11 @@ You can also use docker-compose for quick deployment, please refer to [docker-co
 ```bash
 docker-compose up -d
 ```
+
+> Visit `https://your.own.url/admin` for the admin portal.
+>
+> Default credential: user `admin`, pwd `admin123`.
+> Please change the password after you login.
 
 
 ## 🔧 Build
@@ -118,13 +114,6 @@ The backend will start on `http://localhost:8080`
 
 The frontend development server will start on `http://localhost:3000/admin/`
 
-
-### Logs
-
-The application logs to stdout. In production, redirect to a file:
-```bash
-./pikalink > pikalink.log 2>&1
-```
 
 ## License
 

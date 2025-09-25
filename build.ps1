@@ -3,7 +3,7 @@
 Write-Host "Building PikaLink for production..." -ForegroundColor Cyan
 
 # Check if we're in the right directory
-if (-not (Test-Path "readme.md")) {
+if (-not (Test-Path "README.md")) {
     Write-Host "ERROR: Please run this script from the project root directory" -ForegroundColor Red
     exit 1
 }

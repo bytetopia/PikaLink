@@ -55,22 +55,33 @@ func main() {
         api.GET("/export", handlers.ExportLinks)
     }
     
-    // Serve admin frontend static files at /admin (MUST come before /:code route)
+    // Serve admin frontend static files at /admin
     r.Static("/admin", "./frontend/")
     
+    // Explicit route for root path to serve home page
+    r.GET("/", func(c *gin.Context) {
+        c.File("./frontend/home.html")
+    })
+    
     // Add specific route for short URL redirects (AFTER static routes)
-    r.GET("/:code", handlers.RedirectLink)
+    r.GET("/:code", func(c *gin.Context) {
+        code := c.Param("code")
+        // Special case: if code is "admin", redirect to admin page
+        if code == "admin" {
+            c.Redirect(302, "/admin/")
+            return
+        }
+        handlers.RedirectLink(c)
+    })
     
     // Handle frontend routes that don't match static files
     r.NoRoute(func(c *gin.Context) {
         path := c.Request.URL.Path
-        
         // If it's an admin route that doesn't match a static file, serve index.html
-        if len(path) > 6 && path[:6] == "/admin" {
+        if strings.HasPrefix(path, "/admin") {
             c.File("./frontend/index.html")
             return
         }
-        
         // Default 404
         c.JSON(404, gin.H{"error": "Not found"})
     })
