@@ -13,7 +13,8 @@ import {
   ArrowBack, 
   ExitToApp, 
   AccountCircle, 
-  Settings 
+  Settings,
+  Assessment 
 } from '@mui/icons-material';
 
 function Header({ 
@@ -22,8 +23,7 @@ function Header({
   title = "PikaLink",
   showBackButton = false,
   backButtonText = "Back",
-  backDestination = "/admin",
-  showSettings = true
+  backDestination = "/admin"
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
@@ -39,6 +39,16 @@ function Header({
   const handleChangePassword = () => {
     handleMenuClose();
     navigate('/admin/change-password');
+  };
+
+  const handleImportExport = () => {
+    handleMenuClose();
+    navigate('/admin/import-export');
+  };
+
+  const handleAnalysis = () => {
+    handleMenuClose();
+    navigate('/admin/analysis');
   };
 
   const handleLogout = () => {
@@ -72,39 +82,31 @@ function Header({
           Welcome, {user.username}
         </Typography>
         
-        {showSettings ? (
-          <>
-            <IconButton
-              color="inherit"
-              onClick={handleMenuOpen}
-              sx={{ mr: 1 }}
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleChangePassword}>
-                <Settings sx={{ mr: 1 }} />
-                Change Password
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ExitToApp sx={{ mr: 1 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <Button 
-            color="inherit" 
-            onClick={onLogout} 
-            startIcon={<ExitToApp />}
-          >
+        <IconButton
+          color="inherit"
+          onClick={handleMenuOpen}
+          sx={{ mr: 1 }}
+        >
+          <AccountCircle />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleChangePassword}>
+            <Settings sx={{ mr: 1 }} />
+            Change Password
+          </MenuItem>
+          <MenuItem onClick={handleAnalysis}>
+            <Assessment sx={{ mr: 1 }} />
+            Access Analysis
+          </MenuItem>
+          <MenuItem onClick={handleLogout}>
+            <ExitToApp sx={{ mr: 1 }} />
             Logout
-          </Button>
-        )}
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );

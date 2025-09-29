@@ -110,3 +110,4 @@ temp/
 
 # dist
 dist/
+node_modules

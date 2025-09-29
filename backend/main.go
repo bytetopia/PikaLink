@@ -53,6 +53,8 @@ func main() {
         api.POST("/change-password", handlers.ChangePassword)
         api.POST("/import", handlers.ImportLinks)
         api.GET("/export", handlers.ExportLinks)
+        api.GET("/analysis/months", handlers.GetAnalysisMonths)
+        api.GET("/analyze", handlers.AnalyzeLogs)
     }
     
     // Serve admin frontend static files at /admin

@@ -73,7 +73,6 @@ function ChangePassword({ user, onLogout }) {
         showBackButton={true}
         backButtonText="Back"
         backDestination="/admin"
-        showSettings={false}
       />
 
       <Container maxWidth="sm">

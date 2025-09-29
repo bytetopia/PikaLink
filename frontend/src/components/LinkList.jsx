@@ -16,7 +16,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { Edit, Delete, Add, ContentCopy, ImportExport } from '@mui/icons-material';
+import { Edit, Delete, Add, ContentCopy, ImportExport, Analytics } from '@mui/icons-material';
 import Header from './Header';
 import axios from 'axios';
 import config from '../config';
@@ -81,13 +81,19 @@ function LinkList({ user, onLogout }) {
         onLogout={onLogout} 
         title="PikaLink Dashboard"
         showBackButton={false}
-        showSettings={true}
       />
 
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant="h4">Your Links</Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<Analytics />}
+              onClick={() => navigate('/admin/analysis')}
+            >
+              Analytics
+            </Button>
             <Button
               variant="outlined"
               startIcon={<ImportExport />}

@@ -90,9 +90,8 @@ function CreateLink({ user, onLogout }) {
         onLogout={onLogout} 
         title="Create New Link"
         showBackButton={true}
-        backButtonText="Back to Links"
+        backButtonText="Back"
         backDestination="/admin"
-        showSettings={false}
       />
 
       <Container maxWidth="md" sx={{ mt: 4 }}>
