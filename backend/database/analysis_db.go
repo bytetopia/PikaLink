@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"path/filepath"
 	"strconv"
 
 	"pikalink-backend/models"
+	"pikalink-backend/utils"
 
 	_ "modernc.org/sqlite"
 )
 
-func GetAnalysis(logPath, month, shortURL string) (*models.AnalysisResult, error) {
-	dbPath := filepath.Join(logPath, month+".db")
+func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
+	// Use centralized path logic
+	dbPath := utils.GetLogDbPath(month)
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log database: %w", err)

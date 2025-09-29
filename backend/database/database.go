@@ -4,27 +4,22 @@ import (
     "database/sql"
     "log"
     "os"
-    "path/filepath"
     _ "modernc.org/sqlite"  // Replace the mattn/go-sqlite3 import
     "golang.org/x/crypto/bcrypt"
+    "pikalink-backend/utils"
 )
 
 var DB *sql.DB
 
 func InitDB() {
-    // Get data path from environment variable, default to current directory
-    dataPath := os.Getenv("DATA_PATH")
-    if dataPath == "" {
-        dataPath = "."
-    }
-
-    // Create data directory if it doesn't exist
+    // Get data path and create data directory if it doesn't exist
+    dataPath := utils.GetDataPath()
     if err := os.MkdirAll(dataPath, 0755); err != nil {
         log.Fatal("Failed to create data directory:", err)
     }
 
-    // Construct database file path
-    dbPath := filepath.Join(dataPath, "pikalink.db")
+    // Get database file path from centralized utils
+    dbPath := utils.GetMainDbPath()
     log.Printf("Initializing database at: %s", dbPath)
 
     var err error

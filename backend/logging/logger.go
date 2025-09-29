@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
+	"pikalink-backend/utils"
 	_ "modernc.org/sqlite"
 )
 
@@ -23,19 +23,9 @@ type LogEntry struct {
 	Referer    string
 }
 
-// GetDataPath returns the data path from environment variable or current directory as fallback
-func GetDataPath() string {
-	dataPath := os.Getenv("DATA_PATH")
-	if dataPath == "" {
-		dataPath = "."
-	}
-	return dataPath
-}
-
 // EnsureLogsDirectory creates the logs directory if it doesn't exist
 func EnsureLogsDirectory() error {
-	dataPath := GetDataPath()
-	logsDir := filepath.Join(dataPath, "logs")
+	logsDir := utils.GetLogsDir()
 	if _, err := os.Stat(logsDir); os.IsNotExist(err) {
 		err := os.MkdirAll(logsDir, 0755)
 		if err != nil {
@@ -53,8 +43,9 @@ func GetLogDbFileName() string {
 
 // GetLogDbFilePath returns the full path to the current month's log database file
 func GetLogDbFilePath() string {
-	dataPath := GetDataPath()
-	return filepath.Join(dataPath, "logs", GetLogDbFileName())
+	now := time.Now()
+	month := fmt.Sprintf("%d-%02d", now.Year(), now.Month())
+	return utils.GetLogDbPath(month)
 }
 
 // initLogDB initializes the SQLite database for logging
@@ -95,7 +86,7 @@ func WriteLogEntry(entry LogEntry) error {
 		return err
 	}
 
-	// Get log db file path
+	// Get log db file path using centralized utils
 	logDbPath := GetLogDbFilePath()
 
 	// Initialize database and create table if not exists

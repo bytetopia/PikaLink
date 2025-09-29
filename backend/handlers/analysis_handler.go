@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"pikalink-backend/database"
+	"pikalink-backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
-const logDir = "logs"
-
 func GetAnalysisMonths(c *gin.Context) {
+	logDir := utils.GetLogsDir()
 	files, err := ioutil.ReadDir(logDir)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read log directory"})
@@ -42,7 +42,7 @@ func AnalyzeLogs(c *gin.Context) {
 
 	shortURL := c.Query("short_url")
 
-	analysis, err := database.GetAnalysis(logDir, month, shortURL)
+	analysis, err := database.GetAnalysis(month, shortURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze logs: " + err.Error()})
 		return
