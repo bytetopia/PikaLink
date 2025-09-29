@@ -1,11 +1,14 @@
 package logging
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	_ "modernc.org/sqlite"
 )
 
 // LogEntry represents a single log entry with all required information
@@ -20,9 +23,19 @@ type LogEntry struct {
 	Referer    string
 }
 
+// GetDataPath returns the data path from environment variable or current directory as fallback
+func GetDataPath() string {
+	dataPath := os.Getenv("DATA_PATH")
+	if dataPath == "" {
+		dataPath = "."
+	}
+	return dataPath
+}
+
 // EnsureLogsDirectory creates the logs directory if it doesn't exist
 func EnsureLogsDirectory() error {
-	logsDir := "./logs"
+	dataPath := GetDataPath()
+	logsDir := filepath.Join(dataPath, "logs")
 	if _, err := os.Stat(logsDir); os.IsNotExist(err) {
 		err := os.MkdirAll(logsDir, 0755)
 		if err != nil {
@@ -32,53 +45,73 @@ func EnsureLogsDirectory() error {
 	return nil
 }
 
-// GetLogFileName generates the log file name for the current month
-func GetLogFileName() string {
+// GetLogDbFileName generates the log database file name for the current month
+func GetLogDbFileName() string {
 	now := time.Now()
-	return fmt.Sprintf("%d-%02d.log", now.Year(), now.Month())
+	return fmt.Sprintf("%d-%02d.db", now.Year(), now.Month())
 }
 
-// GetLogFilePath returns the full path to the current month's log file
-func GetLogFilePath() string {
-	return filepath.Join("./logs", GetLogFileName())
+// GetLogDbFilePath returns the full path to the current month's log database file
+func GetLogDbFilePath() string {
+	dataPath := GetDataPath()
+	return filepath.Join(dataPath, "logs", GetLogDbFileName())
 }
 
-// FormatLogEntry formats a log entry into a readable string
-func FormatLogEntry(entry LogEntry) string {
-	return fmt.Sprintf("%s | %s | %s | %s | %d | %s | %s | %s\n",
-		entry.Date,
-		entry.Time,
-		entry.ShortURL,
-		entry.TargetURL,
-		entry.HTTPStatus,
-		entry.CallerIP,
-		entry.UserAgent,
-		entry.Referer,
-	)
+// initLogDB initializes the SQLite database for logging
+func initLogDB(dbPath string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to log database: %v", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping log database: %v", err)
+	}
+
+	createTableSQL := `
+    CREATE TABLE IF NOT EXISTS access_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT,
+        time TEXT,
+        short_url TEXT,
+        target_url TEXT,
+        http_status INTEGER,
+        caller_ip TEXT,
+        user_agent TEXT,
+        referer TEXT
+    );`
+
+	if _, err := db.Exec(createTableSQL); err != nil {
+		return nil, fmt.Errorf("failed to create access_logs table: %v", err)
+	}
+
+	return db, nil
 }
 
-// WriteLogEntry writes a log entry to the current month's log file
+// WriteLogEntry writes a log entry to the current month's log database
 func WriteLogEntry(entry LogEntry) error {
 	// Ensure logs directory exists
 	if err := EnsureLogsDirectory(); err != nil {
 		return err
 	}
 
-	// Get log file path
-	logFilePath := GetLogFilePath()
+	// Get log db file path
+	logDbPath := GetLogDbFilePath()
 
-	// Open file in append mode, create if it doesn't exist
-	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Initialize database and create table if not exists
+	db, err := initLogDB(logDbPath)
 	if err != nil {
-		return fmt.Errorf("failed to open log file: %v", err)
+		return err
 	}
-	defer file.Close()
+	defer db.Close()
 
-	// Format and write the log entry
-	logLine := FormatLogEntry(entry)
-	_, err = file.WriteString(logLine)
+	// Insert log entry
+	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err = db.Exec(insertSQL, entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer)
 	if err != nil {
-		return fmt.Errorf("failed to write log entry: %v", err)
+		return fmt.Errorf("failed to insert log entry into database: %v", err)
 	}
 
 	return nil
@@ -87,7 +120,7 @@ func WriteLogEntry(entry LogEntry) error {
 // LogLinkAccess logs a link access with information extracted from HTTP request
 func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) error {
 	now := time.Now()
-	
+
 	// Extract client IP
 	clientIP := r.Header.Get("X-Forwarded-For")
 	if clientIP == "" {
