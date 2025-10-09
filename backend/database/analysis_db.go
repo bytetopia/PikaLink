@@ -44,20 +44,28 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 	if shortURL != "" {
 		query += " WHERE short_url = ?"
 	}
-	query += " GROUP BY http_status"
+	query += " GROUP BY http_status ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get status distribution: %w", err)
 	}
 	defer rows.Close()
+	count := 0
 	for rows.Next() {
 		var status int
-		var count int64
-		if err := rows.Scan(&status, &count); err != nil {
+		var cnt int64
+		if err := rows.Scan(&status, &cnt); err != nil {
 			log.Printf("Error scanning status distribution: %v", err)
 			continue
 		}
-		result.StatusDistribution[strconv.Itoa(status)] = count
+		count++
+		if count <= 100 {
+			result.StatusDistribution[strconv.Itoa(status)] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.StatusDistribution["..."] = 0
+			break
+		}
 	}
 
 	// Get UA distribution
@@ -65,20 +73,28 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 	if shortURL != "" {
 		query += " WHERE short_url = ?"
 	}
-	query += " GROUP BY user_agent ORDER BY COUNT(*) DESC"
+	query += " GROUP BY user_agent ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err = db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get UA distribution: %w", err)
 	}
 	defer rows.Close()
+	count = 0
 	for rows.Next() {
 		var ua string
-		var count int64
-		if err := rows.Scan(&ua, &count); err != nil {
+		var cnt int64
+		if err := rows.Scan(&ua, &cnt); err != nil {
 			log.Printf("Error scanning UA distribution: %v", err)
 			continue
 		}
-		result.UADistribution[ua] = count
+		count++
+		if count <= 100 {
+			result.UADistribution[ua] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.UADistribution["..."] = 0
+			break
+		}
 	}
 
 	// Get referer distribution
@@ -86,24 +102,32 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 	if shortURL != "" {
 		query += " WHERE short_url = ?"
 	}
-	query += " GROUP BY referer ORDER BY COUNT(*) DESC"
+	query += " GROUP BY referer ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err = db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get referer distribution: %w", err)
 	}
 	defer rows.Close()
+	count = 0
 	for rows.Next() {
 		var referer string
-		var count int64
-		if err := rows.Scan(&referer, &count); err != nil {
+		var cnt int64
+		if err := rows.Scan(&referer, &cnt); err != nil {
 			log.Printf("Error scanning referer distribution: %v", err)
 			continue
 		}
-		result.RefererDistribution[referer] = count
+		count++
+		if count <= 100 {
+			result.RefererDistribution[referer] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.RefererDistribution["..."] = 0
+			break
+		}
 	}
 
-	// Get all short URLs
-	rows, err = db.Query("SELECT DISTINCT short_url FROM access_logs")
+	// Get all short URLs (only 200 and 302 status codes)
+	rows, err = db.Query("SELECT DISTINCT short_url FROM access_logs WHERE http_status IN (200, 302)")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get distinct short URLs: %w", err)
 	}

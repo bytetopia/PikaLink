@@ -29,6 +29,7 @@ const Analysis = ({ user, onLogout }) => {
     const [selectedMonth, setSelectedMonth] = useState('');
     const [analysisData, setAnalysisData] = useState(null);
     const [selectedShortURL, setSelectedShortURL] = useState('');
+    const [activeShortURL, setActiveShortURL] = useState(''); // The URL that was used in the last analysis
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
@@ -96,6 +97,7 @@ const Analysis = ({ user, onLogout }) => {
             
             console.log('Sanitized analysis data:', JSON.stringify(sanitizedData, null, 2)); // Debug sanitized data
             setAnalysisData(sanitizedData);
+            setActiveShortURL(selectedShortURL); // Update the active URL after successful analysis
         } catch (error) {
             console.error('Analysis error:', error); // Debug log
             setError(error.message);
@@ -337,9 +339,9 @@ const Analysis = ({ user, onLogout }) => {
                                             Total Clicks
                                         </Typography>
                                     </Box>
-                                    {selectedShortURL && (
+                                    {activeShortURL && (
                                         <Typography variant="body2" align="center" sx={{ mt: 1, opacity: 0.9 }}>
-                                            for {String(selectedShortURL)}
+                                            for {String(activeShortURL)}
                                         </Typography>
                                     )}
                                 </CardContent>
@@ -369,7 +371,9 @@ const Analysis = ({ user, onLogout }) => {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {Object.entries(analysisData.status_distribution).map(([key, value]) => (
+                                                            {Object.entries(analysisData.status_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
                                                                 <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                                                     <td style={{ padding: '8px' }}>{String(key)}</td>
                                                                     <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#4caf50' }}>{String(value)}</td>
@@ -420,7 +424,9 @@ const Analysis = ({ user, onLogout }) => {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {Object.entries(analysisData.ua_distribution).map(([key, value]) => (
+                                                            {Object.entries(analysisData.ua_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
                                                                 <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                                                     <td style={{ padding: '8px', wordBreak: 'break-all', fontSize: '0.85em' }}>
                                                                         {String(key).length > 80 ? String(key).substring(0, 80) + '...' : String(key)}
@@ -458,7 +464,9 @@ const Analysis = ({ user, onLogout }) => {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {Object.entries(analysisData.referer_distribution).map(([key, value]) => (
+                                                            {Object.entries(analysisData.referer_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
                                                                 <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                                                     <td style={{ padding: '8px', wordBreak: 'break-all' }}>
                                                                         {key === '-' ? 'Direct/Unknown' : String(key)}
