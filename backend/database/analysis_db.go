@@ -63,7 +63,7 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 			result.StatusDistribution[strconv.Itoa(status)] = cnt
 		} else {
 			// We found the 101st row, add "..." and break early
-			result.StatusDistribution["..."] = 0
+			result.StatusDistribution["... (only shows first 100 results)"] = 0
 			break
 		}
 	}
@@ -92,7 +92,7 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 			result.UADistribution[ua] = cnt
 		} else {
 			// We found the 101st row, add "..." and break early
-			result.UADistribution["..."] = 0
+			result.UADistribution["... (only shows first 100 results)"] = 0
 			break
 		}
 	}
@@ -121,7 +121,7 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 			result.RefererDistribution[referer] = cnt
 		} else {
 			// We found the 101st row, add "..." and break early
-			result.RefererDistribution["..."] = 0
+			result.RefererDistribution["... (only shows first 100 results)"] = 0
 			break
 		}
 	}

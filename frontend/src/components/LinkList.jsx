@@ -14,9 +14,12 @@ import {
   TableRow,
   IconButton,
   Alert,
-  CircularProgress
+  CircularProgress,
+  TextField,
+  TablePagination,
+  InputAdornment
 } from '@mui/material';
-import { Edit, Delete, Add, ContentCopy, ImportExport, Analytics } from '@mui/icons-material';
+import { Edit, Delete, Add, ContentCopy, ImportExport, Analytics, Search } from '@mui/icons-material';
 import Header from './Header';
 import axios from 'axios';
 import config from '../config';
@@ -27,6 +30,9 @@ function LinkList({ user, onLogout }) {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const navigate = useNavigate();
 
   // Get the base URL for short redirects - now at root path
@@ -74,6 +80,33 @@ function LinkList({ user, onLogout }) {
     return new Date(dateString).toLocaleDateString();
   };
 
+  // Filter links based on search query
+  const filteredLinks = links.filter(link => 
+    link.short_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    link.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    link.original_url.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Paginate the filtered links
+  const paginatedLinks = filteredLinks.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+    setPage(0); // Reset to first page when searching
+  };
+
   return (
     <>
       <Header 
@@ -113,6 +146,22 @@ function LinkList({ user, onLogout }) {
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            placeholder="Search by short link, title, or URL..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -136,14 +185,14 @@ function LinkList({ user, onLogout }) {
                     </Box>
                   </TableCell>
                 </TableRow>
-              ) : links.length === 0 ? (
+              ) : filteredLinks.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    No links found. Create your first link!
+                    {searchQuery ? 'No links found matching your search.' : 'No links found. Create your first link!'}
                   </TableCell>
                 </TableRow>
               ) : (
-                links.map((link) => (
+                paginatedLinks.map((link) => (
                   <TableRow key={link.id}>
                     <TableCell>{link.title || 'Untitled'}</TableCell>
                     <TableCell>
@@ -189,6 +238,15 @@ function LinkList({ user, onLogout }) {
               )}
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            component="div"
+            count={filteredLinks.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </TableContainer>
       </Container>
     </>

@@ -223,7 +223,7 @@ const Analysis = ({ user, onLogout }) => {
                 <Header
                     user={user} 
                     onLogout={onLogout} 
-                    title="Analytics"
+                    title="Analysis"
                     showBackButton={true}
                     backButtonText="Back"
                     backDestination="/admin"
@@ -242,7 +242,7 @@ const Analysis = ({ user, onLogout }) => {
             <Header
                 user={user} 
                 onLogout={onLogout} 
-                title="Analytics"
+                title="Analysis"
                 showBackButton={true}
                 backButtonText="Back"
                 backDestination="/admin"
