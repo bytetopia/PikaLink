@@ -277,8 +277,8 @@ func RedirectLink(c *gin.Context) {
     }
 
     if shortCode == "" {
-        // Log the failed access attempt
-        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusNotFound)
+        // Log the failed access attempt (async)
+        logging.LogLinkAccessAsync(c.Request, shortCode, "", http.StatusNotFound)
         c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
         return
     }
@@ -289,21 +289,22 @@ func RedirectLink(c *gin.Context) {
         Scan(&linkID, &originalURL)
 
     if err == sql.ErrNoRows {
-        // Log the failed access attempt
-        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusNotFound)
+        // Log the failed access attempt (async)
+        logging.LogLinkAccessAsync(c.Request, shortCode, "", http.StatusNotFound)
         c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
         return
     }
 
     if err != nil {
-        // Log the error
-        logging.LogLinkAccess(c.Request, shortCode, "", http.StatusInternalServerError)
+        // Log the error (async)
+        logging.LogLinkAccessAsync(c.Request, shortCode, "", http.StatusInternalServerError)
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
         return
     }
     
-    // Log the successful redirect
-    logging.LogLinkAccess(c.Request, shortCode, originalURL, http.StatusFound)
+    // Log the successful redirect (async) - this happens AFTER the redirect
+    // so it doesn't block the user's redirect
+    logging.LogLinkAccessAsync(c.Request, shortCode, originalURL, http.StatusFound)
     
     c.Redirect(http.StatusFound, originalURL)
 }

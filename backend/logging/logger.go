@@ -13,14 +13,19 @@ import (
 
 // LogEntry represents a single log entry with all required information
 type LogEntry struct {
-	Date       string
-	Time       string
-	ShortURL   string
-	TargetURL  string
-	HTTPStatus int
-	CallerIP   string
-	UserAgent  string
-	Referer    string
+	Date           string
+	Time           string
+	ShortURL       string
+	TargetURL      string
+	HTTPStatus     int
+	CallerIP       string
+	UserAgent      string
+	Referer        string
+	Browser        string
+	BrowserVersion string
+	OS             string
+	DeviceType     string
+	IsBot          bool
 }
 
 // EnsureLogsDirectory creates the logs directory if it doesn't exist
@@ -69,7 +74,12 @@ func initLogDB(dbPath string) (*sql.DB, error) {
         http_status INTEGER,
         caller_ip TEXT,
         user_agent TEXT,
-        referer TEXT
+        referer TEXT,
+        browser TEXT,
+        browser_version TEXT,
+        os TEXT,
+        device_type TEXT,
+        is_bot BOOLEAN
     );`
 
 	if _, err := db.Exec(createTableSQL); err != nil {
@@ -97,10 +107,10 @@ func WriteLogEntry(entry LogEntry) error {
 	defer db.Close()
 
 	// Insert log entry
-	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer, browser, browser_version, os, device_type, is_bot)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err = db.Exec(insertSQL, entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer)
+	_, err = db.Exec(insertSQL, entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer, entry.Browser, entry.BrowserVersion, entry.OS, entry.DeviceType, entry.IsBot)
 	if err != nil {
 		return fmt.Errorf("failed to insert log entry into database: %v", err)
 	}
@@ -127,6 +137,9 @@ func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) 
 		userAgent = "-"
 	}
 
+	// Parse User-Agent for detailed information
+	uaInfo := ParseUserAgent(userAgent)
+
 	// Extract Referer
 	referer := r.Header.Get("Referer")
 	if referer == "" {
@@ -135,14 +148,19 @@ func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) 
 
 	// Create log entry
 	entry := LogEntry{
-		Date:       now.Format("2006-01-02"),
-		Time:       now.Format("15:04:05"),
-		ShortURL:   shortURL,
-		TargetURL:  targetURL,
-		HTTPStatus: httpStatus,
-		CallerIP:   clientIP,
-		UserAgent:  userAgent,
-		Referer:    referer,
+		Date:           now.Format("2006-01-02"),
+		Time:           now.Format("15:04:05"),
+		ShortURL:       shortURL,
+		TargetURL:      targetURL,
+		HTTPStatus:     httpStatus,
+		CallerIP:       clientIP,
+		UserAgent:      userAgent,
+		Referer:        referer,
+		Browser:        uaInfo.Browser,
+		BrowserVersion: uaInfo.BrowserVersion,
+		OS:             uaInfo.OS,
+		DeviceType:     uaInfo.DeviceType,
+		IsBot:          uaInfo.IsBot,
 	}
 
 	return WriteLogEntry(entry)

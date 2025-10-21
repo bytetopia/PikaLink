@@ -1,11 +1,17 @@
 package main
 
 import (
+    "context"
     "log"
+    "net/http"
     "os"
+    "os/signal"
     "strings"
+    "syscall"
+    "time"
     "pikalink-backend/database"
     "pikalink-backend/handlers"
+    "pikalink-backend/logging"
     "pikalink-backend/middleware"
     "github.com/gin-gonic/gin"
     "github.com/gin-contrib/cors"
@@ -88,6 +94,42 @@ func main() {
         c.JSON(404, gin.H{"error": "Not found"})
     })
     
-    log.Println("Server starting on :8080")
-    r.Run(":8080")
+    // Initialize async logger
+    asyncLogger := logging.GetAsyncLogger()
+    
+    // Create HTTP server
+    srv := &http.Server{
+        Addr:    ":8080",
+        Handler: r,
+    }
+
+    // Start server in a goroutine
+    go func() {
+        log.Println("Server starting on :8080")
+        if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Fatalf("Failed to start server: %v", err)
+        }
+    }()
+
+    // Wait for interrupt signal to gracefully shutdown the server
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+    <-quit
+    log.Println("Shutting down server...")
+
+    // Gracefully shutdown async logger first
+    log.Println("Stopping async logger...")
+    asyncLogger.Stop()
+    log.Println("Async logger stopped")
+
+    // Create a context with timeout for server shutdown
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    // Shutdown server
+    if err := srv.Shutdown(ctx); err != nil {
+        log.Fatal("Server forced to shutdown:", err)
+    }
+
+    log.Println("Server exited")
 }
