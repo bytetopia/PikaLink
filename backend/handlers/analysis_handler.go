@@ -41,8 +41,9 @@ func AnalyzeLogs(c *gin.Context) {
 	}
 
 	shortURL := c.Query("short_url")
+	statusCode := c.Query("status_code")
 
-	analysis, err := database.GetAnalysis(month, shortURL)
+	analysis, err := database.GetAnalysis(month, shortURL, statusCode)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze logs: " + err.Error()})
 		return

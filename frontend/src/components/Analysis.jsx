@@ -30,6 +30,8 @@ const Analysis = ({ user, onLogout }) => {
     const [analysisData, setAnalysisData] = useState(null);
     const [selectedShortURL, setSelectedShortURL] = useState('');
     const [activeShortURL, setActiveShortURL] = useState(''); // The URL that was used in the last analysis
+    const [selectedStatusCode, setSelectedStatusCode] = useState('');
+    const [activeStatusCode, setActiveStatusCode] = useState(''); // The status code that was used in the last analysis
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [analyzing, setAnalyzing] = useState(false);
@@ -75,6 +77,9 @@ const Analysis = ({ user, onLogout }) => {
             if (selectedShortURL) {
                 url += `&short_url=${selectedShortURL}`;
             }
+            if (selectedStatusCode) {
+                url += `&status_code=${selectedStatusCode}`;
+            }
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -92,12 +97,14 @@ const Analysis = ({ user, onLogout }) => {
                 status_distribution: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? data.status_distribution : {},
                 ua_distribution: data?.ua_distribution && typeof data.ua_distribution === 'object' && !Array.isArray(data.ua_distribution) ? data.ua_distribution : {},
                 referer_distribution: data?.referer_distribution && typeof data.referer_distribution === 'object' && !Array.isArray(data.referer_distribution) ? data.referer_distribution : {},
-                short_urls: Array.isArray(data?.short_urls) ? data.short_urls.filter(url => url != null).map(url => String(url)) : []
+                short_urls: Array.isArray(data?.short_urls) ? data.short_urls.filter(url => url != null).map(url => String(url)) : [],
+                status_codes: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? Object.keys(data.status_distribution).filter(code => code != null).map(code => String(code)) : []
             };
             
             console.log('Sanitized analysis data:', JSON.stringify(sanitizedData, null, 2)); // Debug sanitized data
             setAnalysisData(sanitizedData);
             setActiveShortURL(selectedShortURL); // Update the active URL after successful analysis
+            setActiveStatusCode(selectedStatusCode); // Update the active status code after successful analysis
         } catch (error) {
             console.error('Analysis error:', error); // Debug log
             setError(error.message);
@@ -268,7 +275,7 @@ const Analysis = ({ user, onLogout }) => {
                             Analysis Controls
                         </Typography>
                         <Grid container spacing={3} alignItems="center">
-                            <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={3}>
                                 <FormControl fullWidth>
                                     <InputLabel>Select Month</InputLabel>
                                     <Select
@@ -287,7 +294,7 @@ const Analysis = ({ user, onLogout }) => {
                             </Grid>
                             
                             {analysisData && analysisData.short_urls && (
-                                <Grid item xs={12} sm={4}>
+                                <Grid item xs={12} sm={3}>
                                     <FormControl fullWidth>
                                         <InputLabel>Short URL (Optional)</InputLabel>
                                         <Select
@@ -307,7 +314,28 @@ const Analysis = ({ user, onLogout }) => {
                                 </Grid>
                             )}
                             
-                            <Grid item xs={12} sm={4}>
+                            {analysisData && analysisData.status_codes && (
+                                <Grid item xs={12} sm={3}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Status Code (Optional)</InputLabel>
+                                        <Select
+                                            value={selectedStatusCode || ''}
+                                            label="Status Code (Optional)"
+                                            onChange={(e) => setSelectedStatusCode(String(e.target.value || ''))}
+                                            disabled={analyzing}
+                                        >
+                                            <MenuItem value="">All Status Codes</MenuItem>
+                                            {analysisData.status_codes.map((code, index) => (
+                                                <MenuItem key={code || index} value={code}>
+                                                    {String(code || '')}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            )}
+                            
+                            <Grid item xs={12} sm={3}>
                                 <Button
                                     variant="contained"
                                     size="large"
@@ -339,9 +367,11 @@ const Analysis = ({ user, onLogout }) => {
                                             Total Clicks
                                         </Typography>
                                     </Box>
-                                    {activeShortURL && (
+                                    {(activeShortURL || activeStatusCode) && (
                                         <Typography variant="body2" align="center" sx={{ mt: 1, opacity: 0.9 }}>
-                                            for {String(activeShortURL)}
+                                            {activeShortURL && `for ${String(activeShortURL)}`}
+                                            {activeShortURL && activeStatusCode && ' • '}
+                                            {activeStatusCode && `status ${String(activeStatusCode)}`}
                                         </Typography>
                                     )}
                                 </CardContent>

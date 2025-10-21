@@ -12,7 +12,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
+func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, error) {
 	// Use centralized path logic
 	dbPath := utils.GetLogDbPath(month)
 	db, err := sql.Open("sqlite", dbPath)
@@ -27,24 +27,30 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 		RefererDistribution: make(map[string]int64),
 	}
 
-	// Get total clicks
-	query := "SELECT COUNT(*) FROM access_logs"
+	// Build WHERE clause and args for filtering
+	whereClause := ""
 	args := []interface{}{}
-	if shortURL != "" {
-		query += " WHERE short_url = ?"
+	
+	if shortURL != "" && statusCode != "" {
+		whereClause = " WHERE short_url = ? AND http_status = ?"
+		args = append(args, shortURL, statusCode)
+	} else if shortURL != "" {
+		whereClause = " WHERE short_url = ?"
 		args = append(args, shortURL)
+	} else if statusCode != "" {
+		whereClause = " WHERE http_status = ?"
+		args = append(args, statusCode)
 	}
+
+	// Get total clicks
+	query := "SELECT COUNT(*) FROM access_logs" + whereClause
 	err = db.QueryRow(query, args...).Scan(&result.TotalClicks)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get total clicks: %w", err)
 	}
 
 	// Get status distribution
-	query = "SELECT http_status, COUNT(*) FROM access_logs"
-	if shortURL != "" {
-		query += " WHERE short_url = ?"
-	}
-	query += " GROUP BY http_status ORDER BY COUNT(*) DESC LIMIT 101"
+	query = "SELECT http_status, COUNT(*) FROM access_logs" + whereClause + " GROUP BY http_status ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get status distribution: %w", err)
@@ -69,11 +75,7 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 	}
 
 	// Get UA distribution
-	query = "SELECT user_agent, COUNT(*) FROM access_logs"
-	if shortURL != "" {
-		query += " WHERE short_url = ?"
-	}
-	query += " GROUP BY user_agent ORDER BY COUNT(*) DESC LIMIT 101"
+	query = "SELECT user_agent, COUNT(*) FROM access_logs" + whereClause + " GROUP BY user_agent ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err = db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get UA distribution: %w", err)
@@ -98,11 +100,7 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 	}
 
 	// Get referer distribution
-	query = "SELECT referer, COUNT(*) FROM access_logs"
-	if shortURL != "" {
-		query += " WHERE short_url = ?"
-	}
-	query += " GROUP BY referer ORDER BY COUNT(*) DESC LIMIT 101"
+	query = "SELECT referer, COUNT(*) FROM access_logs" + whereClause + " GROUP BY referer ORDER BY COUNT(*) DESC LIMIT 101"
 	rows, err = db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get referer distribution: %w", err)
@@ -139,6 +137,21 @@ func GetAnalysis(month, shortURL string) (*models.AnalysisResult, error) {
 			continue
 		}
 		result.ShortURLs = append(result.ShortURLs, url)
+	}
+
+	// Get all distinct status codes
+	rows, err = db.Query("SELECT DISTINCT http_status FROM access_logs ORDER BY http_status")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get distinct status codes: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var status int
+		if err := rows.Scan(&status); err != nil {
+			log.Printf("Error scanning status code: %v", err)
+			continue
+		}
+		result.StatusCodes = append(result.StatusCodes, strconv.Itoa(status))
 	}
 
 	return result, nil

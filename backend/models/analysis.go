@@ -6,4 +6,5 @@ type AnalysisResult struct {
 	UADistribution      map[string]int64  `json:"ua_distribution"`
 	RefererDistribution map[string]int64  `json:"referer_distribution"`
 	ShortURLs           []string          `json:"short_urls"`
+	StatusCodes         []string          `json:"status_codes"`
 }
