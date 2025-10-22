@@ -14,6 +14,33 @@ A full-stack URL shortener application built with Go backend and React frontend.
 
 - Admin interface with Material-UI
    - CRUD for links
+   - Link access logs and analysis
+   - Batch import / export
+
+## 💻 Screenshots
+
+<table>
+<tr>
+<td>
+   <img src="examples/homepage_1.png" style="width: 500px">
+   <p>Home page </p>
+</td>
+<td>
+   <img src="examples/main_1.png" style="width: 500px">
+   <p>URL list page </p>
+</td>
+</tr>
+<tr>
+<td>
+   <img src="examples/analyze_1.png" style="width: 500px">
+   <p>Access log analysis</p>
+</td>
+<td>
+   <img src="examples/import_1.png" style="width: 500px">
+   <p>Batch import / export</p>
+</td>
+</tr>
+</table>
 
 
 ## 🤖 Selfhost 
