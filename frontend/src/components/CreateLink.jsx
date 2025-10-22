@@ -41,8 +41,8 @@ function CreateLink({ user, onLogout }) {
       return 'Custom code cannot be empty';
     }
     
-    if (code.length < 3 || code.length > 50) {
-      return 'Custom code must be 3-50 characters long';
+    if (code.length < 1 || code.length > 50) {
+      return 'Custom code must be 1-50 characters long';
     }
     
     if (!/^[a-zA-Z0-9_-]+$/.test(code)) {
@@ -157,7 +157,7 @@ function CreateLink({ user, onLogout }) {
                 placeholder="my-awesome-link"
                 value={customCode}
                 onChange={(e) => setCustomCode(e.target.value)}
-                helperText="3-50 characters, letters, numbers, hyphens, and underscores only"
+                helperText="1-50 characters, letters, numbers, hyphens, and underscores only"
                 required={codeType === 'custom'}
               />
             </Collapse>

@@ -27,8 +27,8 @@ func generateShortCode() string {
 
 func isValidCustomCode(code string) bool {
     // Only allow alphanumeric characters, hyphens, and underscores
-    // Length between 3 and 50 characters
-    if len(code) < 3 || len(code) > 50 {
+    // Length between 1 and 50 characters
+    if len(code) < 1 || len(code) > 50 {
         return false
     }
     
@@ -95,7 +95,7 @@ func CreateLink(c *gin.Context) {
         }
         
         if !isValidCustomCode(customCode) {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Custom code must be 3-50 characters long and contain only letters, numbers, hyphens, and underscores"})
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Custom code must be 1-50 characters long and contain only letters, numbers, hyphens, and underscores"})
             return
         }
         
@@ -204,7 +204,7 @@ func UpdateLink(c *gin.Context) {
     if req.ShortCode != "" && req.ShortCode != currentLink.ShortCode {
         // Validate the new short code
         if !isValidCustomCode(req.ShortCode) {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Short code must be 3-50 characters long and contain only letters, numbers, hyphens, and underscores"})
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Short code must be 1-50 characters long and contain only letters, numbers, hyphens, and underscores"})
             return
         }
         

@@ -117,7 +117,7 @@ function EditLink({ user, onLogout }) {
               name="shortCode"
               value={shortCode}
               onChange={(e) => setShortCode(e.target.value)}
-              helperText="3-50 characters, only letters, numbers, hyphens, and underscores allowed"
+              helperText="1-50 characters, only letters, numbers, hyphens, and underscores allowed"
             />
             <TextField
               margin="normal"
