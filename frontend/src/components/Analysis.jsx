@@ -102,7 +102,7 @@ const Analysis = ({ user, onLogout }) => {
                 device_distribution: data?.device_distribution && typeof data.device_distribution === 'object' && !Array.isArray(data.device_distribution) ? data.device_distribution : {},
                 bot_distribution: data?.bot_distribution && typeof data.bot_distribution === 'object' && !Array.isArray(data.bot_distribution) ? data.bot_distribution : {},
                 short_urls: Array.isArray(data?.short_urls) ? data.short_urls.filter(url => url != null).map(url => String(url)) : [],
-                status_codes: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? Object.keys(data.status_distribution).filter(code => code != null).map(code => String(code)) : []
+                status_codes: Array.isArray(data?.status_codes) ? data.status_codes.filter(code => code != null).map(code => String(code)) : []
             };
             
             console.log('Sanitized analysis data:', JSON.stringify(sanitizedData, null, 2)); // Debug sanitized data
