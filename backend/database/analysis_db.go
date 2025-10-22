@@ -1,25 +1,21 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"strconv"
 
 	"pikalink-backend/models"
-	"pikalink-backend/utils"
-
-	_ "modernc.org/sqlite"
 )
 
 func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, error) {
-	// Use centralized path logic
-	dbPath := utils.GetLogDbPath(month)
-	db, err := sql.Open("sqlite", dbPath)
+	// Use connection pool for better performance
+	pool := GetAnalysisPool()
+	db, err := pool.GetConnection(month)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open log database: %w", err)
+		return nil, fmt.Errorf("failed to get database connection for month %s: %w", month, err)
 	}
-	defer db.Close()
+	// Note: We don't defer db.Close() here because the pool manages the connection lifecycle
 
 	result := &models.AnalysisResult{
 		StatusDistribution:  make(map[string]int64),

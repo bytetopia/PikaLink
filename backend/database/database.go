@@ -4,6 +4,7 @@ import (
     "database/sql"
     "log"
     "os"
+    "time"
     _ "modernc.org/sqlite"  // Replace the mattn/go-sqlite3 import
     "golang.org/x/crypto/bcrypt"
     "pikalink-backend/utils"
@@ -32,8 +33,27 @@ func InitDB() {
         log.Fatal("Failed to ping database:", err)
     }
 
+    // Configure connection pool for optimal performance
+    DB.SetMaxOpenConns(25)                     // Limit concurrent connections
+    DB.SetMaxIdleConns(5)                      // Keep some connections alive
+    DB.SetConnMaxLifetime(5 * time.Minute)     // Recycle old connections
+
+    // Enable WAL mode and optimize SQLite settings for better concurrency
+    if _, err := DB.Exec("PRAGMA journal_mode=WAL"); err != nil {
+        log.Printf("Warning: Failed to enable WAL mode: %v", err)
+    }
+    if _, err := DB.Exec("PRAGMA synchronous=NORMAL"); err != nil {
+        log.Printf("Warning: Failed to set synchronous mode: %v", err)
+    }
+    if _, err := DB.Exec("PRAGMA cache_size=1000"); err != nil {
+        log.Printf("Warning: Failed to set cache size: %v", err)
+    }
+    if _, err := DB.Exec("PRAGMA temp_store=MEMORY"); err != nil {
+        log.Printf("Warning: Failed to set temp store: %v", err)
+    }
+
     createTables()
-    log.Println("Database connected and tables created")
+    log.Println("Database connected, optimized, and tables created")
 }
 
 func createTables() {

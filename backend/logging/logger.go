@@ -64,6 +64,17 @@ func initLogDB(dbPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping log database: %v", err)
 	}
 
+	// Optimize log database for write-heavy workload
+	if _, err := db.Exec("PRAGMA journal_mode=WAL"); err != nil {
+		// WAL mode improves concurrent write performance
+	}
+	if _, err := db.Exec("PRAGMA synchronous=NORMAL"); err != nil {
+		// Reduce fsync calls for better performance
+	}
+	if _, err := db.Exec("PRAGMA cache_size=2000"); err != nil {
+		// Larger cache for better performance
+	}
+
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS access_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

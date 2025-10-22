@@ -96,6 +96,18 @@ func main() {
     
     // Initialize async logger
     asyncLogger := logging.GetAsyncLogger()
+
+    // Start database health monitoring
+    go func() {
+        ticker := time.NewTicker(30 * time.Second)
+        defer ticker.Stop()
+        
+        for range ticker.C {
+            if err := database.DB.Ping(); err != nil {
+                log.Printf("Main database health check failed: %v", err)
+            }
+        }
+    }()
     
     // Create HTTP server
     srv := &http.Server{
@@ -121,6 +133,20 @@ func main() {
     log.Println("Stopping async logger...")
     asyncLogger.Stop()
     log.Println("Async logger stopped")
+
+    // Close analysis database pool
+    log.Println("Closing analysis database connections...")
+    analysisPool := database.GetAnalysisPool()
+    analysisPool.CloseAll()
+    log.Println("Analysis database connections closed")
+
+    // Close main database connection
+    log.Println("Closing main database connection...")
+    if err := database.DB.Close(); err != nil {
+        log.Printf("Error closing main database: %v", err)
+    } else {
+        log.Println("Main database closed")
+    }
 
     // Create a context with timeout for server shutdown
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
