@@ -97,6 +97,10 @@ const Analysis = ({ user, onLogout }) => {
                 status_distribution: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? data.status_distribution : {},
                 ua_distribution: data?.ua_distribution && typeof data.ua_distribution === 'object' && !Array.isArray(data.ua_distribution) ? data.ua_distribution : {},
                 referer_distribution: data?.referer_distribution && typeof data.referer_distribution === 'object' && !Array.isArray(data.referer_distribution) ? data.referer_distribution : {},
+                browser_distribution: data?.browser_distribution && typeof data.browser_distribution === 'object' && !Array.isArray(data.browser_distribution) ? data.browser_distribution : {},
+                os_distribution: data?.os_distribution && typeof data.os_distribution === 'object' && !Array.isArray(data.os_distribution) ? data.os_distribution : {},
+                device_distribution: data?.device_distribution && typeof data.device_distribution === 'object' && !Array.isArray(data.device_distribution) ? data.device_distribution : {},
+                bot_distribution: data?.bot_distribution && typeof data.bot_distribution === 'object' && !Array.isArray(data.bot_distribution) ? data.bot_distribution : {},
                 short_urls: Array.isArray(data?.short_urls) ? data.short_urls.filter(url => url != null).map(url => String(url)) : [],
                 status_codes: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? Object.keys(data.status_distribution).filter(code => code != null).map(code => String(code)) : []
             };
@@ -511,12 +515,144 @@ const Analysis = ({ user, onLogout }) => {
                                         </Card>
                                     </Grid>
                                 )}
+                                
+                                {analysisData.browser_distribution && Object.keys(analysisData.browser_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Browser Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Browser</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.browser_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#2196f3' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+                                
+                                {analysisData.os_distribution && Object.keys(analysisData.os_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Operating System Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>OS</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.os_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#009688' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+                                
+                                {analysisData.device_distribution && Object.keys(analysisData.device_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Device Type Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Device Type</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.device_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#795548' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+                                
+                                {analysisData.bot_distribution && Object.keys(analysisData.bot_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Bot vs Human Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Traffic Type</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.bot_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: key === 'Bot' ? '#f44336' : '#4caf50' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
                             </Grid>
 
                             {/* No data message */}
                             {(!analysisData.status_distribution || Object.keys(analysisData.status_distribution).length === 0) &&
                              (!analysisData.ua_distribution || Object.keys(analysisData.ua_distribution).length === 0) &&
-                             (!analysisData.referer_distribution || Object.keys(analysisData.referer_distribution).length === 0) && (
+                             (!analysisData.referer_distribution || Object.keys(analysisData.referer_distribution).length === 0) &&
+                             (!analysisData.browser_distribution || Object.keys(analysisData.browser_distribution).length === 0) &&
+                             (!analysisData.os_distribution || Object.keys(analysisData.os_distribution).length === 0) &&
+                             (!analysisData.device_distribution || Object.keys(analysisData.device_distribution).length === 0) &&
+                             (!analysisData.bot_distribution || Object.keys(analysisData.bot_distribution).length === 0) && (
                                 <Alert severity="info" sx={{ mt: 3 }}>
                                     No distribution data available for the selected period.
                                 </Alert>
