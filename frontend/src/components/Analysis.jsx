@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import { Analytics as AnalyticsIcon, TrendingUp } from '@mui/icons-material';
 import Header from './Header';
+import axios from 'axios';
 import config from '../config';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -40,15 +41,8 @@ const Analysis = ({ user, onLogout }) => {
         const fetchMonths = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${config.API_BASE_URL}/analysis/months`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch months');
-                }
-                const data = await response.json();
+                const response = await axios.get(`${config.API_BASE_URL}/analysis/months`);
+                const data = response.data;
                 console.log('Months data received:', data); // Debug log
                 const monthsArray = Array.isArray(data) ? data.filter(month => month != null).map(month => String(month)) : [];
                 setMonths(monthsArray);
@@ -57,7 +51,7 @@ const Analysis = ({ user, onLogout }) => {
                 }
                 setError('');
             } catch (error) {
-                setError(error.message);
+                setError(error.response?.data?.error || error.message || 'Failed to fetch months');
             } finally {
                 setLoading(false);
             }
@@ -80,15 +74,8 @@ const Analysis = ({ user, onLogout }) => {
             if (selectedStatusCode) {
                 url += `&status_code=${selectedStatusCode}`;
             }
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-            if (!response.ok) {
-                throw new Error('Failed to fetch analysis data');
-            }
-            const data = await response.json();
+            const response = await axios.get(url);
+            const data = response.data;
             console.log('Raw analysis data received:', JSON.stringify(data, null, 2)); // Enhanced debug log
             
             // Validate and sanitize the data more thoroughly
@@ -111,7 +98,7 @@ const Analysis = ({ user, onLogout }) => {
             setActiveStatusCode(selectedStatusCode); // Update the active status code after successful analysis
         } catch (error) {
             console.error('Analysis error:', error); // Debug log
-            setError(error.message);
+            setError(error.response?.data?.error || error.message || 'Failed to fetch analysis data');
             setAnalysisData(null);
         } finally {
             setAnalyzing(false);
