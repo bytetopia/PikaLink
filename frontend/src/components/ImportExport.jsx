@@ -29,12 +29,6 @@ function ImportExport({ user, onLogout }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const getAuthHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file && file.type === 'text/csv') {
@@ -66,9 +60,7 @@ function ImportExport({ user, onLogout }) {
         `${API_BASE_URL}/import`,
         formData,
         {
-          ...getAuthHeaders(),
           headers: {
-            ...getAuthHeaders().headers,
             'Content-Type': 'multipart/form-data'
           }
         }
@@ -94,7 +86,6 @@ function ImportExport({ user, onLogout }) {
       const response = await axios.get(
         `${API_BASE_URL}/export`,
         {
-          ...getAuthHeaders(),
           responseType: 'blob'
         }
       );

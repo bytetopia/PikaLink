@@ -25,15 +25,9 @@ function EditLink({ user, onLogout }) {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const getAuthHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-
   const fetchLink = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/links`, getAuthHeaders());
+      const response = await axios.get(`${API_BASE_URL}/links`);
       const links = response.data || [];
       const link = links.find(l => l.id === parseInt(id));
       
@@ -65,7 +59,7 @@ function EditLink({ user, onLogout }) {
         original_url: originalUrl,
         title: title,
         short_code: shortCode
-      }, getAuthHeaders());
+      });
 
       navigate('/admin');
     } catch (err) {

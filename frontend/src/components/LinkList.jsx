@@ -40,15 +40,9 @@ function LinkList({ user, onLogout }) {
     return config.SHORT_LINK_BASE_URL;
   };
 
-  const getAuthHeaders = () => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-
   const fetchLinks = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/links`, getAuthHeaders());
+      const response = await axios.get(`${API_BASE_URL}/links`);
       setLinks(response.data || []);
     } catch (err) {
       setError('Failed to fetch links');
@@ -64,7 +58,7 @@ function LinkList({ user, onLogout }) {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this link?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/links/${id}`, getAuthHeaders());
+        await axios.delete(`${API_BASE_URL}/links/${id}`);
         setLinks(links.filter(link => link.id !== id));
       } catch (err) {
         setError('Failed to delete link');

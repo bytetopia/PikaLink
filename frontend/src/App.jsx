@@ -9,6 +9,7 @@ import EditLink from './components/EditLink';
 import ChangePassword from './components/ChangePassword';
 import ImportExport from './components/ImportExport';
 import Analysis from './components/Analysis';
+import { setupAxiosInterceptors } from './utils/axiosConfig';
 
 const theme = createTheme({
   palette: {
@@ -25,7 +26,16 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Handle automatic logout when 401 is received
+  const handleUnauthorized = () => {
+    setUser(null);
+    // The localStorage cleanup is already handled in the interceptor
+  };
+
   useEffect(() => {
+    // Setup axios interceptors for automatic 401 handling
+    setupAxiosInterceptors(handleUnauthorized);
+
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     

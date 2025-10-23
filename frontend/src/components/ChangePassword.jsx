@@ -43,14 +43,9 @@ function ChangePassword({ user, onLogout }) {
     }
 
     try {
-      const token = localStorage.getItem('token');
       await axios.post(`${API_BASE_URL}/change-password`, {
         current_password: currentPassword,
         new_password: newPassword
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
       });
 
       setSuccess('Password changed successfully!');
