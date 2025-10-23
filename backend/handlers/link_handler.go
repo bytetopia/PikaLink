@@ -168,6 +168,37 @@ func GetLinks(c *gin.Context) {
     c.JSON(http.StatusOK, links)
 }
 
+func GetLink(c *gin.Context) {
+    id := c.Param("id")
+    linkID, err := strconv.Atoi(id)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid link ID"})
+        return
+    }
+
+    userID := c.MustGet("user_id").(int)
+    
+    var link models.Link
+    err = database.DB.QueryRow(`
+        SELECT id, original_url, short_code, title, created_at, updated_at 
+        FROM links WHERE id = ? AND user_id = ?
+    `, linkID, userID).Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.Title, 
+                            &link.CreatedAt, &link.UpdatedAt)
+    
+    if err == sql.ErrNoRows {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        return
+    }
+    
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch link"})
+        return
+    }
+    
+    link.UserID = userID
+    c.JSON(http.StatusOK, link)
+}
+
 func UpdateLink(c *gin.Context) {
     id := c.Param("id")
     linkID, err := strconv.Atoi(id)

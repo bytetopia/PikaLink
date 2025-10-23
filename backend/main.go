@@ -59,6 +59,7 @@ func main() {
     api.Use(middleware.AuthMiddleware())
     {
         api.GET("/links", handlers.GetLinks)
+        api.GET("/links/:id", handlers.GetLink)
         api.POST("/links", handlers.CreateLink)
         api.PUT("/links/:id", handlers.UpdateLink)
         api.DELETE("/links/:id", handlers.DeleteLink)

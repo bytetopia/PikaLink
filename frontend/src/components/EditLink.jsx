@@ -27,19 +27,18 @@ function EditLink({ user, onLogout }) {
 
   const fetchLink = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/links`);
-      const links = response.data || [];
-      const link = links.find(l => l.id === parseInt(id));
+      const response = await axios.get(`${API_BASE_URL}/links/${id}`);
+      const link = response.data;
       
-      if (link) {
-        setOriginalUrl(link.original_url);
-        setTitle(link.title || '');
-        setShortCode(link.short_code || '');
-      } else {
-        setError('Link not found');
-      }
+      setOriginalUrl(link.original_url);
+      setTitle(link.title || '');
+      setShortCode(link.short_code || '');
     } catch (err) {
-      setError('Failed to fetch link details');
+      if (err.response?.status === 404) {
+        setError('Link not found');
+      } else {
+        setError('Failed to fetch link details');
+      }
     } finally {
       setFetchLoading(false);
     }
