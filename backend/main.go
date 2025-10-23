@@ -9,6 +9,7 @@ import (
     "strings"
     "syscall"
     "time"
+    "pikalink-backend/config"
     "pikalink-backend/database"
     "pikalink-backend/handlers"
     "pikalink-backend/logging"
@@ -20,6 +21,11 @@ import (
 func main() {
     // Initialize database
     database.InitDB()
+    
+    // Initialize JWT secret
+    if err := config.InitJWTSecret(database.DB); err != nil {
+        log.Fatal("Failed to initialize JWT secret:", err)
+    }
     
     // Create Gin router
     r := gin.Default()

@@ -76,12 +76,24 @@ func createTables() {
         FOREIGN KEY (user_id) REFERENCES users (id)
     );`
 
+    systemConfigTable := `
+    CREATE TABLE IF NOT EXISTS system_config (
+        config_key TEXT PRIMARY KEY,
+        config_value TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );`
+
     if _, err := DB.Exec(userTable); err != nil {
         log.Fatal("Failed to create users table:", err)
     }
 
     if _, err := DB.Exec(linkTable); err != nil {
         log.Fatal("Failed to create links table:", err)
+    }
+
+    if _, err := DB.Exec(systemConfigTable); err != nil {
+        log.Fatal("Failed to create system_config table:", err)
     }
 
     // Create default admin user (password: admin123)

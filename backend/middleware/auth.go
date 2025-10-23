@@ -3,11 +3,10 @@ package middleware
 import (
     "net/http"
     "strings"
+    "pikalink-backend/config"
     "github.com/gin-gonic/gin"
     "github.com/golang-jwt/jwt/v5"
 )
-
-var jwtSecret = []byte("your-secret-key-change-this-in-production")
 
 func AuthMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
@@ -20,7 +19,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
         tokenString := strings.TrimPrefix(authHeader, "Bearer ")
         token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-            return jwtSecret, nil
+            return config.GetJWTSecret(), nil
         })
 
         if err != nil || !token.Valid {
@@ -45,5 +44,5 @@ func GenerateJWT(userID int, username string) (string, error) {
     }
 
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-    return token.SignedString(jwtSecret)
+    return token.SignedString(config.GetJWTSecret())
 }
