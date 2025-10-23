@@ -47,7 +47,7 @@ function EditLink({ user, onLogout }) {
 
   useEffect(() => {
     fetchLink();
-  }, [id]);
+  }, [id]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e) => {
     e.preventDefault();

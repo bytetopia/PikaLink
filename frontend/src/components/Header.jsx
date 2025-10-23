@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -39,11 +39,6 @@ function Header({
   const handleChangePassword = () => {
     handleMenuClose();
     navigate('/admin/change-password');
-  };
-
-  const handleImportExport = () => {
-    handleMenuClose();
-    navigate('/admin/import-export');
   };
 
   const handleAnalysis = () => {

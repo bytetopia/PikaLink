@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Bar } from 'react-chartjs-2';
+import { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import {
     Container,
@@ -102,116 +101,6 @@ const Analysis = ({ user, onLogout }) => {
             setAnalysisData(null);
         } finally {
             setAnalyzing(false);
-        }
-    };
-
-    const getChartData = (distribution, color = 'rgba(25, 118, 210, 0.6)') => {
-        if (!distribution || typeof distribution !== 'object' || Array.isArray(distribution)) {
-            return { labels: [], datasets: [] };
-        }
-        
-        try {
-            // Process entries to handle special cases
-            const entries = Object.entries(distribution).filter(([key, value]) => key != null && value != null);
-            
-            // Create safe labels and data
-            const labels = entries.map(([key]) => {
-                let label = String(key).trim();
-                // Handle empty or dash-only labels
-                if (!label || label === '-' || label === 'null' || label === 'undefined') {
-                    label = 'Direct/Unknown';
-                }
-                // Truncate very long labels (like user agents) for better chart display
-                if (label.length > 30) {
-                    label = label.substring(0, 27) + '...';
-                }
-                // Remove any potential problematic characters that might cause React issues
-                return label.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-            });
-            
-            const data = entries.map(([, value]) => {
-                const num = Number(value);
-                return isNaN(num) || num < 0 ? 0 : Math.floor(num);
-            });
-            
-            // Ensure we have valid data
-            if (labels.length === 0 || data.length === 0) {
-                return { labels: [], datasets: [] };
-            }
-            
-            return {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Count',
-                        data: data,
-                        backgroundColor: color,
-                        borderColor: typeof color === 'string' ? color.replace('0.6', '1') : color,
-                        borderWidth: 1,
-                    },
-                ],
-            };
-        } catch (error) {
-            console.error('Error processing chart data:', error, distribution);
-            return { labels: [], datasets: [] };
-        }
-    };
-
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            intersect: false,
-            mode: 'index'
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    generateLabels: function(chart) {
-                        const original = ChartJS.overrides.bar.plugins.legend.labels.generateLabels;
-                        const labels = original.call(this, chart);
-                        return labels.map(label => ({
-                            ...label,
-                            text: String(label.text || 'Count')
-                        }));
-                    }
-                }
-            },
-            title: {
-                display: false,
-            },
-            tooltip: {
-                callbacks: {
-                    title: function(context) {
-                        return String(context[0].label || '');
-                    },
-                    label: function(context) {
-                        return `Count: ${String(context.parsed.y || 0)}`;
-                    }
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: {
-                    maxRotation: 45,
-                    minRotation: 0,
-                    callback: function(value, index) {
-                        const label = this.getLabelForValue(value);
-                        return String(label || '').length > 15 ? String(label || '').substring(0, 12) + '...' : String(label || '');
-                    }
-                }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0,
-                    callback: function(value) {
-                        return String(Math.floor(Number(value) || 0));
-                    }
-                }
-            }
         }
     };
 
@@ -378,12 +267,6 @@ const Analysis = ({ user, onLogout }) => {
                                                     HTTP Status Distribution
                                                 </Typography>
                                                 <Box sx={{ height: 300, overflow: 'auto' }}>
-                                                    {/* Temporarily replaced with table - Chart code commented out
-                                                    <Bar 
-                                                        data={getChartData(analysisData.status_distribution, 'rgba(76, 175, 80, 0.6)')} 
-                                                        options={chartOptions}
-                                                    />
-                                                    */}
                                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                         <thead>
                                                             <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
@@ -416,27 +299,6 @@ const Analysis = ({ user, onLogout }) => {
                                                     User-Agent Distribution
                                                 </Typography>
                                                 <Box sx={{ height: 300, overflow: 'auto' }}>
-                                                    {/* Temporarily replaced with table - Chart code commented out
-                                                    <Bar 
-                                                        data={getChartData(analysisData.ua_distribution, 'rgba(255, 152, 0, 0.6)')} 
-                                                        options={{
-                                                            ...chartOptions,
-                                                            scales: {
-                                                                ...chartOptions.scales,
-                                                                x: {
-                                                                    ticks: {
-                                                                        maxRotation: 45,
-                                                                        minRotation: 45,
-                                                                        callback: function(value, index) {
-                                                                            const label = this.getLabelForValue(value);
-                                                                            return label.length > 20 ? label.substring(0, 20) + '...' : label;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }}
-                                                    />
-                                                    */}
                                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                         <thead>
                                                             <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
@@ -471,12 +333,6 @@ const Analysis = ({ user, onLogout }) => {
                                                     Referer Distribution
                                                 </Typography>
                                                 <Box sx={{ height: 300, overflow: 'auto' }}>
-                                                    {/* Temporarily replaced with table - Chart code commented out
-                                                    <Bar 
-                                                        data={getChartData(analysisData.referer_distribution, 'rgba(156, 39, 176, 0.6)')} 
-                                                        options={chartOptions}
-                                                    />
-                                                    */}
                                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                         <thead>
                                                             <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
