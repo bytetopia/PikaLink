@@ -48,6 +48,14 @@ function App() {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    
+    // Store default password status
+    if (userData.is_default_password) {
+      localStorage.setItem('needs_password_change', 'true');
+    } else {
+      localStorage.removeItem('needs_password_change');
+    }
+    
     setUser(userData);
   };
 

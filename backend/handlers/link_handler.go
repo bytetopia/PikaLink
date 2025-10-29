@@ -70,9 +70,12 @@ func Login(c *gin.Context) {
         return
     }
 
+    // Check if user is using default password (admin123)
+    isDefaultPassword := req.Password == "admin123"
+
     c.JSON(http.StatusOK, gin.H{
         "token": token,
-        "user":  gin.H{"id": user.ID, "username": user.Username},
+        "user":  gin.H{"id": user.ID, "username": user.Username, "is_default_password": isDefaultPassword},
     })
 }
 
@@ -386,7 +389,13 @@ func ChangePassword(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
+    // Check if the new password is still the default password
+    isStillDefault := req.NewPassword == "admin123"
+
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Password changed successfully",
+        "is_default_password": isStillDefault,
+    })
 }
 
 // ImportResult represents the result of a CSV import operation

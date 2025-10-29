@@ -43,7 +43,7 @@ function ChangePassword({ user, onLogout }) {
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/change-password`, {
+      const response = await axios.post(`${API_BASE_URL}/change-password`, {
         current_password: currentPassword,
         new_password: newPassword
       });
@@ -52,6 +52,20 @@ function ChangePassword({ user, onLogout }) {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      
+      // Update the default password flag based on backend response
+      if (response.data.is_default_password) {
+        localStorage.setItem('needs_password_change', 'true');
+        // Add warning if they set it back to default
+        setSuccess('Password changed successfully! However, you are still using the default password. Please consider using a more secure password.');
+      } else {
+        localStorage.removeItem('needs_password_change');
+      }
+      
+      // Dispatch custom event to notify Header component
+      window.dispatchEvent(new CustomEvent('passwordChanged', { 
+        detail: { isDefaultPassword: response.data.is_default_password } 
+      }));
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to change password');
     } finally {
