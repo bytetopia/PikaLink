@@ -19,6 +19,7 @@ func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, er
 
 	result := &models.AnalysisResult{
 		StatusDistribution:  make(map[string]int64),
+		URLDistribution:     make(map[string]int64),
 		UADistribution:      make(map[string]int64),
 		RefererDistribution: make(map[string]int64),
 		BrowserDistribution: make(map[string]int64),
@@ -70,6 +71,31 @@ func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, er
 		} else {
 			// We found the 101st row, add "..." and break early
 			result.StatusDistribution["... (only shows first 100 results)"] = 0
+			break
+		}
+	}
+
+	// Get URL distribution
+	query = "SELECT short_url, COUNT(*) FROM access_logs" + whereClause + " GROUP BY short_url ORDER BY COUNT(*) DESC LIMIT 101"
+	rows, err = db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get URL distribution: %w", err)
+	}
+	defer rows.Close()
+	count = 0
+	for rows.Next() {
+		var url string
+		var cnt int64
+		if err := rows.Scan(&url, &cnt); err != nil {
+			log.Printf("Error scanning URL distribution: %v", err)
+			continue
+		}
+		count++
+		if count <= 100 {
+			result.URLDistribution[url] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.URLDistribution["... (only shows first 100 results)"] = 0
 			break
 		}
 	}

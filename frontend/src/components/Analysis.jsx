@@ -81,6 +81,7 @@ const Analysis = ({ user, onLogout }) => {
             const sanitizedData = {
                 total_clicks: Number(data?.total_clicks) || 0,
                 status_distribution: data?.status_distribution && typeof data.status_distribution === 'object' && !Array.isArray(data.status_distribution) ? data.status_distribution : {},
+                url_distribution: data?.url_distribution && typeof data.url_distribution === 'object' && !Array.isArray(data.url_distribution) ? data.url_distribution : {},
                 ua_distribution: data?.ua_distribution && typeof data.ua_distribution === 'object' && !Array.isArray(data.ua_distribution) ? data.ua_distribution : {},
                 referer_distribution: data?.referer_distribution && typeof data.referer_distribution === 'object' && !Array.isArray(data.referer_distribution) ? data.referer_distribution : {},
                 browser_distribution: data?.browser_distribution && typeof data.browser_distribution === 'object' && !Array.isArray(data.browser_distribution) ? data.browser_distribution : {},
@@ -291,6 +292,72 @@ const Analysis = ({ user, onLogout }) => {
                                     </Grid>
                                 )}
                                 
+                                {analysisData.url_distribution && Object.keys(analysisData.url_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Short URL Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Short URL</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.url_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px', wordBreak: 'break-all' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#3f51b5' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+
+                                                                {analysisData.referer_distribution && Object.keys(analysisData.referer_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Referer Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Referer</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.referer_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px', wordBreak: 'break-all' }}>
+                                                                        {key === '-' ? 'Direct/Unknown' : String(key)}
+                                                                    </td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#9c27b0' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+                                
                                 {analysisData.ua_distribution && Object.keys(analysisData.ua_distribution).length > 0 && (
                                     <Grid item xs={12} lg={4}>
                                         <Card elevation={2} sx={{ height: 400 }}>
@@ -315,40 +382,6 @@ const Analysis = ({ user, onLogout }) => {
                                                                         {String(key).length > 80 ? String(key).substring(0, 80) + '...' : String(key)}
                                                                     </td>
                                                                     <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#ff9800' }}>{String(value)}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
-                                                </Box>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                )}
-                                
-                                {analysisData.referer_distribution && Object.keys(analysisData.referer_distribution).length > 0 && (
-                                    <Grid item xs={12} lg={4}>
-                                        <Card elevation={2} sx={{ height: 400 }}>
-                                            <CardContent sx={{ height: '100%' }}>
-                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
-                                                    Referer Distribution
-                                                </Typography>
-                                                <Box sx={{ height: 300, overflow: 'auto' }}>
-                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                        <thead>
-                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
-                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Referer</th>
-                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {Object.entries(analysisData.referer_distribution)
-                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
-                                                                .map(([key, value]) => (
-                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                                                    <td style={{ padding: '8px', wordBreak: 'break-all' }}>
-                                                                        {key === '-' ? 'Direct/Unknown' : String(key)}
-                                                                    </td>
-                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#9c27b0' }}>{String(value)}</td>
                                                                 </tr>
                                                             ))}
                                                         </tbody>
@@ -490,6 +523,7 @@ const Analysis = ({ user, onLogout }) => {
 
                             {/* No data message */}
                             {(!analysisData.status_distribution || Object.keys(analysisData.status_distribution).length === 0) &&
+                             (!analysisData.url_distribution || Object.keys(analysisData.url_distribution).length === 0) &&
                              (!analysisData.ua_distribution || Object.keys(analysisData.ua_distribution).length === 0) &&
                              (!analysisData.referer_distribution || Object.keys(analysisData.referer_distribution).length === 0) &&
                              (!analysisData.browser_distribution || Object.keys(analysisData.browser_distribution).length === 0) &&
