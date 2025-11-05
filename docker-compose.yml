@@ -1,18 +1,85 @@
+# PikaLink Docker Compose Configuration
+# https://github.com/bytetopia/pikalink
+
 version: '3.8'
 
 services:
   pikalink:
     image: bytetopia/pikalink:latest
+    container_name: pikalink
+    
+    # Port configuration - change if needed
     ports:
       - "8080:8080"
+    
+    # Volume mounts
     volumes:
-      - /YOUR_OWN_PATH_ON_HOST_MACHINE/:/app/data
+      # Main data directory for SQLite databases and logs
+      - pikalink_data:/app/data
+      
+      # Optional: Uncomment the line below if you have GeoLite2 databases
+      # Download GeoLite2-City.mmdb and GeoLite2-ASN.mmdb from MaxMind
+      # and place them in ./geolite2/ directory on your host
+      # - ./geolite2:/app/geolite:ro
+    
+    # Environment variables
     environment:
       - DATA_PATH=/app/data
+      
+      # Optional: Uncomment if using GeoLite2 databases
+      # - GEO_IP_DB_PATH=/app/geolite
+      
+      # Optional: Set CORS origins for your domain
+      # - CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+    
+    # Optional: Use .env file for environment variables
+    # Create a .env file in the same directory as this docker-compose.yml
+    # env_file:
+    #   - .env
+    
+    # Restart policy
     restart: unless-stopped
+    
+    # Security: Run as non-root user (if image supports it)
+    # user: "1000:1000"
+    
+    # Resource limits (uncomment and adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+    #       cpus: '0.5'
+    #     reservations:
+    #       memory: 256M
+    
+    # Health check
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/admin/"]
-      interval: 120s
+      interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
+    
+    # Network configuration
+    networks:
+      - pikalink_network
+    
+    # Labels for better management
+    labels:
+      - "com.docker.compose.project=pikalink"
+      - "com.pikalink.service=app"
+
+# Named volumes for better data management
+volumes:
+  pikalink_data:
+    driver: local
+    # Optional: Use bind mount to specific host path
+    # driver_opts:
+    #   type: none
+    #   o: bind
+    #   device: /path/to/your/data
+
+# Network definition
+networks:
+  pikalink_network:
+    driver: bridge

@@ -114,3 +114,7 @@ node_modules
 backend/pikalink.db-shm
 .gitignore
 backend/pikalink.db-wal
+
+
+# geoip db
+*.mmdb
