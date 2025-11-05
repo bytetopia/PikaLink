@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Build backend
-FROM golang:1.23-alpine AS backend-builder
+FROM golang:1.24-alpine AS backend-builder
 
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev sqlite-dev
