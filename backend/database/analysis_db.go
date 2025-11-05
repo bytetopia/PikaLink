@@ -26,6 +26,9 @@ func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, er
 		OSDistribution:      make(map[string]int64),
 		DeviceDistribution:  make(map[string]int64),
 		BotDistribution:     make(map[string]int64),
+		CountryDistribution: make(map[string]int64),
+		CityDistribution:    make(map[string]int64),
+		ASNDistribution:     make(map[string]int64),
 	}
 
 	// Build WHERE clause and args for filtering
@@ -240,6 +243,81 @@ func GetAnalysis(month, shortURL, statusCode string) (*models.AnalysisResult, er
 			continue
 		}
 		result.BotDistribution[botType] = cnt
+	}
+
+	// Get IP country distribution
+	query = "SELECT COALESCE(ip_country, 'Unknown'), COUNT(*) FROM access_logs" + whereClause + " GROUP BY ip_country ORDER BY COUNT(*) DESC LIMIT 101"
+	rows, err = db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get country distribution: %w", err)
+	}
+	defer rows.Close()
+	count = 0
+	for rows.Next() {
+		var country string
+		var cnt int64
+		if err := rows.Scan(&country, &cnt); err != nil {
+			log.Printf("Error scanning country distribution: %v", err)
+			continue
+		}
+		count++
+		if count <= 100 {
+			result.CountryDistribution[country] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.CountryDistribution["... (only shows first 100 results)"] = 0
+			break
+		}
+	}
+
+	// Get IP city distribution (country-city pair)
+	query = "SELECT COALESCE(ip_country, 'Unknown') || ' - ' || COALESCE(ip_city, 'Unknown'), COUNT(*) FROM access_logs" + whereClause + " GROUP BY ip_country, ip_city ORDER BY COUNT(*) DESC LIMIT 101"
+	rows, err = db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get city distribution: %w", err)
+	}
+	defer rows.Close()
+	count = 0
+	for rows.Next() {
+		var cityPair string
+		var cnt int64
+		if err := rows.Scan(&cityPair, &cnt); err != nil {
+			log.Printf("Error scanning city distribution: %v", err)
+			continue
+		}
+		count++
+		if count <= 100 {
+			result.CityDistribution[cityPair] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.CityDistribution["... (only shows first 100 results)"] = 0
+			break
+		}
+	}
+
+	// Get ASN distribution
+	query = "SELECT COALESCE(ip_asn, 'Unknown'), COUNT(*) FROM access_logs" + whereClause + " GROUP BY ip_asn ORDER BY COUNT(*) DESC LIMIT 101"
+	rows, err = db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ASN distribution: %w", err)
+	}
+	defer rows.Close()
+	count = 0
+	for rows.Next() {
+		var asn string
+		var cnt int64
+		if err := rows.Scan(&asn, &cnt); err != nil {
+			log.Printf("Error scanning ASN distribution: %v", err)
+			continue
+		}
+		count++
+		if count <= 100 {
+			result.ASNDistribution[asn] = cnt
+		} else {
+			// We found the 101st row, add "..." and break early
+			result.ASNDistribution["... (only shows first 100 results)"] = 0
+			break
+		}
 	}
 
 	// Get all short URLs (only 200 and 302 status codes)

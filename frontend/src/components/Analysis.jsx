@@ -88,6 +88,9 @@ const Analysis = ({ user, onLogout }) => {
                 os_distribution: data?.os_distribution && typeof data.os_distribution === 'object' && !Array.isArray(data.os_distribution) ? data.os_distribution : {},
                 device_distribution: data?.device_distribution && typeof data.device_distribution === 'object' && !Array.isArray(data.device_distribution) ? data.device_distribution : {},
                 bot_distribution: data?.bot_distribution && typeof data.bot_distribution === 'object' && !Array.isArray(data.bot_distribution) ? data.bot_distribution : {},
+                country_distribution: data?.country_distribution && typeof data.country_distribution === 'object' && !Array.isArray(data.country_distribution) ? data.country_distribution : {},
+                city_distribution: data?.city_distribution && typeof data.city_distribution === 'object' && !Array.isArray(data.city_distribution) ? data.city_distribution : {},
+                asn_distribution: data?.asn_distribution && typeof data.asn_distribution === 'object' && !Array.isArray(data.asn_distribution) ? data.asn_distribution : {},
                 short_urls: Array.isArray(data?.short_urls) ? data.short_urls.filter(url => url != null).map(url => String(url)) : [],
                 status_codes: Array.isArray(data?.status_codes) ? data.status_codes.filter(code => code != null).map(code => String(code)) : []
             };
@@ -519,6 +522,102 @@ const Analysis = ({ user, onLogout }) => {
                                         </Card>
                                     </Grid>
                                 )}
+
+                                {analysisData.country_distribution && Object.keys(analysisData.country_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    Country Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Country</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.country_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#2196f3' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+
+                                {analysisData.city_distribution && Object.keys(analysisData.city_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    City Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>Country - City</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.city_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#ff5722' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+
+                                {analysisData.asn_distribution && Object.keys(analysisData.asn_distribution).length > 0 && (
+                                    <Grid item xs={12} lg={4}>
+                                        <Card elevation={2} sx={{ height: 400 }}>
+                                            <CardContent sx={{ height: '100%' }}>
+                                                <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
+                                                    ASN Distribution
+                                                </Typography>
+                                                <Box sx={{ height: 300, overflow: 'auto' }}>
+                                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <thead>
+                                                            <tr style={{ borderBottom: '2px solid #e0e0e0' }}>
+                                                                <th style={{ padding: '8px', textAlign: 'left' }}>ASN</th>
+                                                                <th style={{ padding: '8px', textAlign: 'right' }}>Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.entries(analysisData.asn_distribution)
+                                                                .sort(([, a], [, b]) => Number(b) - Number(a))
+                                                                .map(([key, value]) => (
+                                                                <tr key={key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                                                    <td style={{ padding: '8px' }}>{String(key)}</td>
+                                                                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: '#607d8b' }}>{String(value)}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
                             </Grid>
 
                             {/* No data message */}
@@ -529,7 +628,10 @@ const Analysis = ({ user, onLogout }) => {
                              (!analysisData.browser_distribution || Object.keys(analysisData.browser_distribution).length === 0) &&
                              (!analysisData.os_distribution || Object.keys(analysisData.os_distribution).length === 0) &&
                              (!analysisData.device_distribution || Object.keys(analysisData.device_distribution).length === 0) &&
-                             (!analysisData.bot_distribution || Object.keys(analysisData.bot_distribution).length === 0) && (
+                             (!analysisData.bot_distribution || Object.keys(analysisData.bot_distribution).length === 0) &&
+                             (!analysisData.country_distribution || Object.keys(analysisData.country_distribution).length === 0) &&
+                             (!analysisData.city_distribution || Object.keys(analysisData.city_distribution).length === 0) &&
+                             (!analysisData.asn_distribution || Object.keys(analysisData.asn_distribution).length === 0) && (
                                 <Alert severity="info" sx={{ mt: 3 }}>
                                     No distribution data available for the selected period.
                                 </Alert>
