@@ -26,6 +26,9 @@ type LogEntry struct {
 	OS             string
 	DeviceType     string
 	IsBot          bool
+	IPCountry      string
+	IPCity         string
+	IPASN          string
 }
 
 // EnsureLogsDirectory creates the logs directory if it doesn't exist
@@ -90,7 +93,10 @@ func initLogDB(dbPath string) (*sql.DB, error) {
         browser_version TEXT,
         os TEXT,
         device_type TEXT,
-        is_bot BOOLEAN
+        is_bot BOOLEAN,
+        ip_country TEXT,
+        ip_city TEXT,
+        ip_asn TEXT
     );`
 
 	if _, err := db.Exec(createTableSQL); err != nil {
@@ -118,10 +124,10 @@ func WriteLogEntry(entry LogEntry) error {
 	defer db.Close()
 
 	// Insert log entry
-	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer, browser, browser_version, os, device_type, is_bot)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer, browser, browser_version, os, device_type, is_bot, ip_country, ip_city, ip_asn)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err = db.Exec(insertSQL, entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer, entry.Browser, entry.BrowserVersion, entry.OS, entry.DeviceType, entry.IsBot)
+	_, err = db.Exec(insertSQL, entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer, entry.Browser, entry.BrowserVersion, entry.OS, entry.DeviceType, entry.IsBot, entry.IPCountry, entry.IPCity, entry.IPASN)
 	if err != nil {
 		return fmt.Errorf("failed to insert log entry into database: %v", err)
 	}
@@ -151,6 +157,9 @@ func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) 
 	// Parse User-Agent for detailed information
 	uaInfo := ParseUserAgent(userAgent)
 
+	// Parse IP address for geolocation information
+	ipInfo := ParseIPAddress(clientIP)
+
 	// Extract Referer
 	referer := r.Header.Get("Referer")
 	if referer == "" {
@@ -172,6 +181,9 @@ func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) 
 		OS:             uaInfo.OS,
 		DeviceType:     uaInfo.DeviceType,
 		IsBot:          uaInfo.IsBot,
+		IPCountry:      ipInfo.Country,
+		IPCity:         ipInfo.City,
+		IPASN:          ipInfo.ASN,
 	}
 
 	return WriteLogEntry(entry)

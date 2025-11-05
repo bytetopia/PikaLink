@@ -175,8 +175,8 @@ func (al *AsyncLogger) processBatch(batch []LogEntry) {
 	}
 
 	// Prepare batch insert statement
-	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer, browser, browser_version, os, device_type, is_bot)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	insertSQL := `INSERT INTO access_logs (date, time, short_url, target_url, http_status, caller_ip, user_agent, referer, browser, browser_version, os, device_type, is_bot, ip_country, ip_city, ip_asn)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	stmt, err := db.Prepare(insertSQL)
 	if err != nil {
@@ -200,7 +200,8 @@ func (al *AsyncLogger) processBatch(batch []LogEntry) {
 	for _, entry := range batch {
 		_, err := txStmt.Exec(entry.Date, entry.Time, entry.ShortURL, entry.TargetURL, 
 			entry.HTTPStatus, entry.CallerIP, entry.UserAgent, entry.Referer, 
-			entry.Browser, entry.BrowserVersion, entry.OS, entry.DeviceType, entry.IsBot)
+			entry.Browser, entry.BrowserVersion, entry.OS, entry.DeviceType, entry.IsBot,
+			entry.IPCountry, entry.IPCity, entry.IPASN)
 		if err != nil {
 			log.Printf("Failed to insert log entry: %v", err)
 			continue
@@ -255,6 +256,9 @@ func (al *AsyncLogger) createLogEntry(r *http.Request, shortURL, targetURL strin
 	// Parse User-Agent for detailed information (this is now async)
 	uaInfo := ParseUserAgent(userAgent)
 
+	// Parse IP address for geolocation information (this is now async)
+	ipInfo := ParseIPAddress(clientIP)
+
 	// Extract Referer
 	referer := r.Header.Get("Referer")
 	if referer == "" {
@@ -275,6 +279,9 @@ func (al *AsyncLogger) createLogEntry(r *http.Request, shortURL, targetURL strin
 		OS:             uaInfo.OS,
 		DeviceType:     uaInfo.DeviceType,
 		IsBot:          uaInfo.IsBot,
+		IPCountry:      ipInfo.Country,
+		IPCity:         ipInfo.City,
+		IPASN:          ipInfo.ASN,
 	}
 }
 
