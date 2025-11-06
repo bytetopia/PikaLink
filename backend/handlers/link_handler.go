@@ -313,7 +313,7 @@ func RedirectLink(c *gin.Context) {
     if shortCode == "" {
         // Log the failed access attempt (async)
         logging.LogLinkAccessAsync(c.Request, shortCode, "", http.StatusNotFound)
-        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        Serve404Page(c)
         return
     }
 
@@ -325,7 +325,7 @@ func RedirectLink(c *gin.Context) {
     if err == sql.ErrNoRows {
         // Log the failed access attempt (async)
         logging.LogLinkAccessAsync(c.Request, shortCode, "", http.StatusNotFound)
-        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        Serve404Page(c)
         return
     }
 

@@ -8,6 +8,8 @@ import (
     _ "modernc.org/sqlite"  // Replace the mattn/go-sqlite3 import
     "golang.org/x/crypto/bcrypt"
     "pikalink-backend/utils"
+    "pikalink-backend/defaults"
+    "pikalink-backend/models"
 )
 
 var DB *sql.DB
@@ -104,4 +106,22 @@ func createTables() {
     }
     
     DB.Exec("INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)", "admin", string(hashedPassword))
+    
+    // Initialize default system configurations
+    initDefaultConfigs()
+}
+
+func initDefaultConfigs() {
+    // Get default HTML content from the centralized defaults package
+    defaultHomePage := defaults.GetDefaultHomePage()
+    default404Page := defaults.GetDefault404Page()
+
+    // Insert default configurations if they don't exist
+    DB.Exec(`INSERT OR IGNORE INTO system_config (config_key, config_value, created_at, updated_at) 
+             VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`, 
+             models.ConfigKeyHomePage, defaultHomePage)
+             
+    DB.Exec(`INSERT OR IGNORE INTO system_config (config_key, config_value, created_at, updated_at) 
+             VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`, 
+             models.ConfigKey404Page, default404Page)
 }

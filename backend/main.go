@@ -68,15 +68,16 @@ func main() {
         api.GET("/export", handlers.ExportLinks)
         api.GET("/analysis/months", handlers.GetAnalysisMonths)
         api.GET("/analyze", handlers.AnalyzeLogs)
+        // Config management routes
+        api.GET("/config/:key", handlers.GetConfig)
+        api.PUT("/config/:key", handlers.UpdateConfig)
     }
     
     // Serve admin frontend static files at /admin
     r.Static("/admin", "./frontend/")
     
     // Explicit route for root path to serve home page
-    r.GET("/", func(c *gin.Context) {
-        c.File("./frontend/home.html")
-    })
+    r.GET("/", handlers.ServeHomePage)
     
     // Add specific route for short URL redirects (AFTER static routes)
     r.GET("/:code", func(c *gin.Context) {
@@ -97,8 +98,8 @@ func main() {
             c.File("./frontend/index.html")
             return
         }
-        // Default 404
-        c.JSON(404, gin.H{"error": "Not found"})
+        // Default 404 - serve custom 404 page
+        handlers.Serve404Page(c)
     })
     
     // Initialize async logger

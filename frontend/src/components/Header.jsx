@@ -18,7 +18,8 @@ import {
   AccountCircle, 
   Settings,
   Assessment,
-  Close
+  Close,
+  Web
 } from '@mui/icons-material';
 
 function Header({ 
@@ -66,6 +67,11 @@ function Header({
   const handleAnalysis = () => {
     handleMenuClose();
     navigate('/admin/analysis');
+  };
+
+  const handlePageContent = () => {
+    handleMenuClose();
+    navigate('/admin/page-content');
   };
 
   const handleLogout = () => {
@@ -130,6 +136,10 @@ function Header({
             <MenuItem onClick={handleAnalysis}>
               <Assessment sx={{ mr: 1 }} />
               Access Analysis
+            </MenuItem>
+            <MenuItem onClick={handlePageContent}>
+              <Web sx={{ mr: 1 }} />
+              Customize Pages
             </MenuItem>
             <MenuItem onClick={handleLogout}>
               <ExitToApp sx={{ mr: 1 }} />
