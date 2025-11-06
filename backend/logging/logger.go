@@ -3,7 +3,6 @@ package logging
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -41,12 +40,6 @@ func EnsureLogsDirectory() error {
 		}
 	}
 	return nil
-}
-
-// GetLogDbFileName generates the log database file name for the current month
-func GetLogDbFileName() string {
-	now := time.Now()
-	return fmt.Sprintf("%d-%02d.db", now.Year(), now.Month())
 }
 
 // GetLogDbFilePath returns the full path to the current month's log database file
@@ -133,58 +126,4 @@ func WriteLogEntry(entry LogEntry) error {
 	}
 
 	return nil
-}
-
-// LogLinkAccess logs a link access with information extracted from HTTP request
-func LogLinkAccess(r *http.Request, shortURL, targetURL string, httpStatus int) error {
-	now := time.Now()
-
-	// Extract client IP
-	clientIP := r.Header.Get("X-Forwarded-For")
-	if clientIP == "" {
-		clientIP = r.Header.Get("X-Real-IP")
-	}
-	if clientIP == "" {
-		clientIP = r.RemoteAddr
-	}
-
-	// Extract User-Agent
-	userAgent := r.Header.Get("User-Agent")
-	if userAgent == "" {
-		userAgent = "-"
-	}
-
-	// Parse User-Agent for detailed information
-	uaInfo := ParseUserAgent(userAgent)
-
-	// Parse IP address for geolocation information
-	ipInfo := ParseIPAddress(clientIP)
-
-	// Extract Referer
-	referer := r.Header.Get("Referer")
-	if referer == "" {
-		referer = "-"
-	}
-
-	// Create log entry
-	entry := LogEntry{
-		Date:           now.Format("2006-01-02"),
-		Time:           now.Format("15:04:05"),
-		ShortURL:       shortURL,
-		TargetURL:      targetURL,
-		HTTPStatus:     httpStatus,
-		CallerIP:       clientIP,
-		UserAgent:      userAgent,
-		Referer:        referer,
-		Browser:        uaInfo.Browser,
-		BrowserVersion: uaInfo.BrowserVersion,
-		OS:             uaInfo.OS,
-		DeviceType:     uaInfo.DeviceType,
-		IsBot:          uaInfo.IsBot,
-		IPCountry:      ipInfo.Country,
-		IPCity:         ipInfo.City,
-		IPASN:          ipInfo.ASN,
-	}
-
-	return WriteLogEntry(entry)
 }
