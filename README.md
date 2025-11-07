@@ -2,20 +2,21 @@
 
 A full-stack URL shortener application built with Go backend and React frontend.
 
-> [!NOTE]
-> This project is actively iterating. Current release is ready for use with basic functionalities, but the API / DB schema might have siginificant change in the near future. It's not recommended to use it in production business yet.
-
-
 ## 📚 Features
 
 - Lightweight app
    - Built with Go for great performance and easy deployment
-   - SQLite database
+   - SQLite database, no external dependencies
 
 - Admin interface with Material-UI
    - Create, update, delete, search links
    - Link access logs and analysis, including referer, UA and IP analysis
    - Batch import / export links
+   - Customize home page and 404 page
+
+## 🚀Releases
+
+- v 1.1.0 First released version!
 
 ## 💻 Screenshots
 
@@ -23,7 +24,7 @@ A full-stack URL shortener application built with Go backend and React frontend.
 <tr>
 <td>
    <img src="examples/homepage_1.png" style="width: 500px">
-   <p>Home page </p>
+   <p>Customizable home page </p>
 </td>
 <td>
    <img src="examples/main_1.png" style="width: 500px">
@@ -104,8 +105,8 @@ You can also use docker-compose for quick deployment. Update the volume path in 
 # Edit docker-compose.yml to set your host path, then:
 docker-compose up -d
 ```
-
-> Visit `https://your.own.url/admin` for the admin portal.
+> [!NOTE]
+> Visit `https://your-own-url/admin` for the admin portal.
 >
 > Default credential: user `admin`, pwd `admin123`.
 > Please change the password after you login.
