@@ -15,6 +15,7 @@ import (
     "pikalink-backend/models"
     "pikalink-backend/middleware"
     "pikalink-backend/logging"
+    "pikalink-backend/utils"
     "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
 )
@@ -336,11 +337,20 @@ func RedirectLink(c *gin.Context) {
         return
     }
     
+    // Merge the original URL with any additional path and query parameters from the short URL
+    mergedURL, err := utils.MergeURLWithShortURL(originalURL, c.Request.URL.Path, c.Request.URL.RawQuery)
+    if err != nil {
+        // Log the error (async)
+        logging.LogLinkAccessAsync(c.Request, shortCode, originalURL, http.StatusInternalServerError)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "URL merge error"})
+        return
+    }
+    
     // Log the successful redirect (async) - this happens AFTER the redirect
     // so it doesn't block the user's redirect
-    logging.LogLinkAccessAsync(c.Request, shortCode, originalURL, http.StatusFound)
+    logging.LogLinkAccessAsync(c.Request, shortCode, mergedURL, http.StatusFound)
     
-    c.Redirect(http.StatusFound, originalURL)
+    c.Redirect(http.StatusFound, mergedURL)
 }
 
 func ChangePassword(c *gin.Context) {

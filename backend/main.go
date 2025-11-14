@@ -79,7 +79,19 @@ func main() {
     // Explicit route for root path to serve home page
     r.GET("/", handlers.ServeHomePage)
     
-    // Add specific route for short URL redirects (AFTER static routes)
+    // Add specific route for short URL redirects with wildcard to capture subpaths
+    // This route matches /:code and /:code/* (any subpaths)
+    r.GET("/:code/*subpath", func(c *gin.Context) {
+        code := c.Param("code")
+        // Special case: if code is "admin", redirect to admin page
+        if code == "admin" {
+            c.Redirect(302, "/admin/")
+            return
+        }
+        handlers.RedirectLink(c)
+    })
+    
+    // Add route for short URL without subpath (/:code only)
     r.GET("/:code", func(c *gin.Context) {
         code := c.Param("code")
         // Special case: if code is "admin", redirect to admin page

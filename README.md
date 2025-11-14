@@ -8,6 +8,10 @@ A full-stack URL shortener application built with Go backend and React frontend.
    - Built with Go for great performance and easy deployment
    - SQLite database, no external dependencies
 
+- Advanced URL redirects
+   - Automatically merges subpaths and query parameters from short URL (higher priority) to the original URL
+   - Example: Short URL `yourdomain.com/docs/api?version=2` redirecting to original URL `example.com/reference?version=1&lang=en` will result in `example.com/reference/api?version=2&lang=en`
+
 - Admin interface with Material-UI
    - Create, update, delete, search links
    - Link access logs and analysis, including referer, UA and IP analysis
@@ -16,6 +20,7 @@ A full-stack URL shortener application built with Go backend and React frontend.
 
 ## 🚀Releases
 
+- v 1.1.1 Support redirects with subpath and query
 - v 1.1.0 First released version!
 
 ## 💻 Screenshots
@@ -110,7 +115,6 @@ docker-compose up -d
 >
 > Default credential: user `admin`, pwd `admin123`.
 > Please change the password after you login.
-
 
 ## 🔧 Build
 
