@@ -11,6 +11,9 @@ RUN npm run build
 # Build backend
 FROM golang:1.24-alpine AS backend-builder
 
+# Accept version as build argument
+ARG VERSION=unknown
+
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev sqlite-dev
 
@@ -25,8 +28,14 @@ COPY --from=frontend-builder /app/frontend/build ./frontend
 # Build the Go binary
 RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o pikalink main.go
 
+# Create version file
+RUN echo -n "$VERSION" > version.txt
+
 # Final stage
 FROM alpine:latest
+
+# Accept version as build argument in final stage
+ARG VERSION=unknown
 
 # Install ca-certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates tzdata
@@ -36,6 +45,7 @@ WORKDIR /app
 # Copy the binary and frontend files
 COPY --from=backend-builder /app/backend/pikalink .
 COPY --from=backend-builder /app/backend/frontend ./frontend
+COPY --from=backend-builder /app/backend/version.txt .
 
 # Create data directory for SQLite database
 RUN mkdir -p /app/data

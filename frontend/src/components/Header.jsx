@@ -19,7 +19,8 @@ import {
   Settings,
   Assessment,
   Close,
-  Web
+  Web,
+  Info
 } from '@mui/icons-material';
 
 function Header({ 
@@ -72,6 +73,11 @@ function Header({
   const handlePageContent = () => {
     handleMenuClose();
     navigate('/admin/page-content');
+  };
+
+  const handleAbout = () => {
+    handleMenuClose();
+    navigate('/admin/about');
   };
 
   const handleLogout = () => {
@@ -140,6 +146,10 @@ function Header({
             <MenuItem onClick={handlePageContent}>
               <Web sx={{ mr: 1 }} />
               Customize Pages
+            </MenuItem>
+            <MenuItem onClick={handleAbout}>
+              <Info sx={{ mr: 1 }} />
+              About
             </MenuItem>
             <MenuItem onClick={handleLogout}>
               <ExitToApp sx={{ mr: 1 }} />

@@ -10,6 +10,7 @@ import ChangePassword from './components/ChangePassword';
 import ImportExport from './components/ImportExport';
 import Analysis from './components/Analysis';
 import PageContentManager from './components/PageContentManager';
+import About from './components/About';
 import { setupAxiosInterceptors } from './utils/axiosConfig';
 
 const theme = createTheme({
@@ -121,6 +122,12 @@ function App() {
             path="/admin/page-content" 
             element={
               user ? <PageContentManager user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
+            } 
+          />
+          <Route 
+            path="/admin/about" 
+            element={
+              user ? <About user={user} onLogout={logout} /> : <Navigate to="/admin/login" />
             } 
           />
           {/* Redirect root to admin */}

@@ -7,6 +7,7 @@ TAG="pikalink:latest"
 PUSH=false
 REGISTRY=""
 NO_BUILD_CACHE=false
+VERSION="unknown"
 
 # Colors for output
 RED='\033[0;31m'
@@ -25,6 +26,7 @@ show_help() {
     echo
     echo "Options:"
     echo "  -t, --tag TAG         Docker image tag (default: pikalink:latest)"
+    echo "  -v, --version VERSION Version number to embed (default: unknown)"
     echo "  -p, --push            Push image to registry after build"
     echo "  -r, --registry REG    Registry URL for pushing"
     echo "  -n, --no-cache        Build without using cache"
@@ -32,7 +34,7 @@ show_help() {
     echo
     echo "Examples:"
     echo "  $0                                    # Build with default tag"
-    echo "  $0 -t pikalink:v1.0.0               # Build with specific tag"
+    echo "  $0 -t pikalink:v1.0.0 -v 1.0.0       # Build with specific tag and version"
     echo "  $0 -t pikalink:v1.0.0 -p -r docker.io/username  # Build and push"
     echo "  $0 -n -t pikalink:latest            # Build without cache"
 }
@@ -42,6 +44,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -t|--tag)
             TAG="$2"
+            shift 2
+            ;;
+        -v|--version)
+            VERSION="$2"
             shift 2
             ;;
         -p|--push)
@@ -82,8 +88,11 @@ if [[ "$NO_BUILD_CACHE" == true ]]; then
     BUILD_ARGS="--no-cache"
 fi
 
+# Add version build argument
+BUILD_ARGS="$BUILD_ARGS --build-arg VERSION=$VERSION"
+
 # Build the image
-echo -e "${BLUE}Building Docker image with tag: $TAG${NC}"
+echo -e "${BLUE}Building Docker image with tag: $TAG (version: $VERSION)${NC}"
 BUILD_COMMAND="docker build $BUILD_ARGS -t $TAG ."
 echo -e "${GRAY}Executing: $BUILD_COMMAND${NC}"
 

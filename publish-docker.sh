@@ -79,8 +79,8 @@ fi
 
 echo -e "${CYAN}Publishing PikaLink v$VERSION to $REGISTRY...${NC}"
 
-# Build image
-if ! ./docker-build.sh -t "pikalink:$VERSION" -n; then
+# Build image with version
+if ! ./docker-build.sh -t "pikalink:$VERSION" -v "$VERSION" -n; then
     echo -e "${RED}ERROR: Build failed${NC}" >&2
     exit 1
 fi

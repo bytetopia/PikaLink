@@ -71,6 +71,8 @@ func main() {
         // Config management routes
         api.GET("/config/:key", handlers.GetConfig)
         api.PUT("/config/:key", handlers.UpdateConfig)
+        // Version endpoint
+        api.GET("/version", handlers.GetVersion)
     }
     
     // Serve admin frontend static files at /admin
